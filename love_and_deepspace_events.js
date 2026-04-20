@@ -685,5 +685,14 @@ const eventCards = [
     cards: {
       "秦徹": ["至心棲之處"]
     }
-  }
+  },
+  {
+    year: "2026",
+    duration: "4.21-4.28",
+    eventName: "當海湮沒於海",
+    poolType: "日卡池 III(復刻)",
+    cards: {
+      "祁煜": ["霧海神臨", "霧海離歌"]
+    }
+  }  
 ];
