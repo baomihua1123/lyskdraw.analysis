@@ -154,7 +154,7 @@ function renderUI() {
 
         const isBlack    = r.pulls > 55 && r.pulls <= 62;
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
-       // 替換迴圈內的 return 區塊
+        // 修正後的 return 區塊：垃圾桶在三條線前面
         return `
         <div class="h-record-card" draggable="true" 
              ondragstart="handleDragStart(event, ${r.id})" 
@@ -176,8 +176,9 @@ function renderUI() {
                     <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
                     <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
                     
+                    <button class="del-btn-icon" onclick="deleteRec(${r.id})" title="刪除紀錄">🗑️</button>
+                    
                     <div class="drag-handle" title="按住拖曳來排序">☰</div>
-                    <button class="del-btn-icon" onclick="deleteRec(${r.id})">🗑️</button>
                 </div>
             </div>
         </div>`;
