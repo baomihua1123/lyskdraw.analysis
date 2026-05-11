@@ -154,30 +154,34 @@ function renderUI() {
 
         const isBlack    = r.pulls > 55 && r.pulls <= 62;
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
-       return `
+        // 修改後的 return 部分內容
+        return `
         <div class="h-record-card" draggable="true" 
-             ondragstart="handleDragStart(event, ${r.id})" 
-             ondragover="handleDragOver(event)" 
-             ondragleave="handleDragLeave(event)" 
-             ondrop="handleDrop(event, ${r.id})"
-             ondragend="handleDragEnd(event)">
-            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
-            <div class="h-content">
-                <div class="h-left">
-                    <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''}${subTagHtml}<span class="tag" style="background-color: ${statusColor};">${cardTypeStr}</span></div>
-                    <span class="h-title">
-                        <span style="font-size: 15px; font-weight: bold; color: var(--text-main);">${r.card || '未知'}</span>
-                        <span style="font-size: 12px; font-weight: normal;"> | ${r.banner}</span>
-                        <span class="h-date">${dateStr}</span>
-                    </span>
-                </div>
-                <div class="h-right">
-                    <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
-                    <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
-                    <button class="del-btn-icon" onclick="deleteRec(${r.id})">🗑️</button>
-                </div>
-            </div>
-        </div>`;
+            ondragstart="handleDragStart(event, ${r.id})" 
+            ondragover="handleDragOver(event)" 
+            ondragleave="handleDragLeave(event)" 
+            ondrop="handleDrop(event, ${r.id})"
+            ondragend="handleDragEnd(event)">
+        <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
+        <div class="h-content">
+            <div class="h-left">
+                <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''}${subTagHtml}<span class="tag" style="background-color: ${statusColor};">${cardTypeStr}</span></div>
+                <span class="h-title">
+                <span style="font-size: 15px; font-weight: bold; color: var(--text-main);">${r.card || '未知'}</span>
+                <span style="font-size: 12px; font-weight: normal;"> | ${r.banner}</span>
+                <span class="h-date">${dateStr}</span>
+            </span>
+        </div>
+        <div class="h-right">
+            <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
+            <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
+            
+            <div class="drag-handle">☰</div>
+            
+            <button class="del-btn-icon" onclick="deleteRec(${r.id})">🗑️</button>
+        </div>
+    </div>
+</div>`;
     }).join('');
 
     const paginationEl = document.getElementById('paginationControls');
