@@ -174,9 +174,14 @@
                         <option value="常駐">常駐池</option>
                     </select>
                 </div>
-                <button onclick="clearAll()" style="background:none; border:none; color:#ef4444; font-size:11px; cursor:pointer;">清空</button>
-            </div>
-            
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <label for="importFile" style="cursor: pointer; font-size: 12px; color: var(--primary); font-weight: bold;">匯入</label>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                    
+                    <button onclick="exportData()" style="background:none; border:none; color:var(--primary); font-size:12px; cursor:pointer; font-weight: bold; padding: 0;">匯出</button>
+                    <button onclick="clearAll()" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; padding: 0;">清空</button>
+                </div>
+            </div>            
             <div id="recordList"></div>
             
             <div id="paginationControls" class="pagination-controls"></div>
@@ -202,6 +207,12 @@
 <script src="pool-logic.js"></script>
 <script src="records.js"></script>
 <script src="render.js"></script>
+
+<script src="storage.js"></script>
+<script src="pool-logic.js"></script>
+<script src="records.js"></script>
+<script src="render.js"></script>
+<script src="data_sync.js"></script> ```   
 
 </body>
 </html>
