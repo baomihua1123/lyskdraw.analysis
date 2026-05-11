@@ -23,8 +23,28 @@ const setP  = (type, v) => { _setP(type, v); renderUI(); };
 function migrateDB() {
     const db = getDB();
     let changed = false;
+    
     db.forEach(r => {
-        if (r.res === 'oshi_spook') { r.res = 'wai_std'; changed = true; }
+        if (r.res === 'oshi_spook') { 
+            r.res = 'wai_std'; 
+            changed = true; 
+        }
+        
+        // 👇 新增：錯字修正邏輯 (請將下方單引號內的文字換成你實際打錯的字)
+        
+        // 1. 如果是「卡名」有錯字：
+        if (r.card === '這裡填舊的錯誤卡名') { 
+            r.card = '這裡填正確的卡名'; 
+            changed = true; 
+        }
+        
+        // 2. 如果是「卡池名稱」有錯字：
+        if (r.banner === '這裡填舊的錯誤卡池名') { 
+            r.banner = '這裡填正確的卡池名'; 
+            changed = true; 
+        }
     });
+    
+    // 如果有發現錯字並進行了修改，就把更新後的資料存回資料庫
     if (changed) setDB(db);
 }
