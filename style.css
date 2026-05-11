@@ -72,13 +72,12 @@ p.subtitle { color: var(--text-sub); font-size: 13px; margin: 6px 0 0 0; }
 .oshi-header { display: flex; justify-content: space-between; align-items: center; }
 .oshi-header label { color: var(--oshi-color); margin: 0; font-size: 13px; font-weight: bold; }
 
-.pending-board { display: flex; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; font-size: 12px; font-weight: bold; }
-.pending-item { cursor: pointer; padding: 4px; border-radius: 6px; transition: 0.2s; flex: 1; text-align: center; }
-.pending-item:hover { background: rgba(139, 92, 246, 0.05); }
+.pending-board { display: flex; justify-content: space-between; gap: 10px; /* 區塊之間的間隔 */  margin-bottom: 15px; font-size: 12px; font-weight: bold; }
+.pending-item { cursor: pointer; background: var(--input-bg); /* 把灰底移到每個獨立小區塊上 */ border: 1px solid var(--border); /* 加上外框線 */ padding: 12px 8px; border-radius: 8px; transition: 0.2s; flex: 1; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.pending-item:hover { background: rgba(139, 92, 246, 0.05); border-color: var(--primary); }
 .pending-item span { font-size: 16px; color: var(--text-main); display: block; margin-top: 4px; }
-.pending-lim { color: var(--limited-color); border-right: 1px solid var(--border); }
+.pending-lim { color: var(--limited-color); } 
 .pending-re  { color: var(--rerun-color); }
-
 .form-group { margin-bottom: 16px; }
 label.group-label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-sub); font-weight: bold; }
 input[type="text"], input[type="number"], input[type="date"] {width: 100%; padding: 10px; background-color: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
