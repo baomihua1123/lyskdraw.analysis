@@ -154,9 +154,13 @@ function renderUI() {
 
         const isBlack    = r.pulls > 55 && r.pulls <= 62;
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
-
-        return `
-        <div class="h-record-card">
+       return `
+        <div class="h-record-card" draggable="true" 
+             ondragstart="handleDragStart(event, ${r.id})" 
+             ondragover="handleDragOver(event)" 
+             ondragleave="handleDragLeave(event)" 
+             ondrop="handleDrop(event, ${r.id})"
+             ondragend="handleDragEnd(event)">
             <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
             <div class="h-content">
                 <div class="h-left">
