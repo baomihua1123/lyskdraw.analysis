@@ -192,3 +192,16 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
 /* 新增：強制男主按鈕在手機端保持同一排並平均分配空間 */
 .lead-radio-group { flex-wrap: nowrap !important; gap: 4px; width: 100%; justify-content: space-between; }
 .lead-radio-group .radio-label { padding: 6px 2px; flex: 1; justify-content: center; gap: 4px; }
+
+/* 拖曳時的視覺回饋樣式 */
+.h-record-card[draggable="true"] {
+    cursor: grab;
+}
+.h-record-card[draggable="true"]:active {
+    cursor: grabbing;
+}
+.h-record-card.drag-over {
+    border: 2px dashed var(--primary);
+    transform: scale(0.98);
+    opacity: 0.8;
+}
