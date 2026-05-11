@@ -19,32 +19,37 @@ const getP  = (type) => parseInt(localStorage.getItem('p_' + type)) || 0;
 const _setP = (type, v) => localStorage.setItem('p_' + type, v);
 const setP  = (type, v) => { _setP(type, v); renderUI(); };
 
+// ── 錯字自動更正字典 ─────────────────────────────────────
+// 以後如果發現系統層級的錯字，只要在這裡加一行對照表就好
+const TYPO_CORRECTIONS = {
+    '極空迴音': '極空迴響',
+    '今日無處可選': '今日無處可逃',
+};
+
 // ── 一次性資料遷移 ─────────────────────────────────────────
 function migrateDB() {
     const db = getDB();
     let changed = false;
     
     db.forEach(r => {
+        // 修正舊版的歪卡標籤
         if (r.res === 'oshi_spook') { 
             r.res = 'wai_std'; 
             changed = true; 
         }
         
-        // 👇 新增：錯字修正邏輯 (請將下方單引號內的文字換成你實際打錯的字)
-        
-        // 1. 如果是「卡名」有錯字：
-        if (r.card === '這裡填舊的錯誤卡名') { 
-            r.card = '這裡填正確的卡名'; 
+        // 自動比對字典並替換卡池名稱
+        if (r.banner && TYPO_CORRECTIONS[r.banner]) { 
+            r.banner = TYPO_CORRECTIONS[r.banner]; 
             changed = true; 
         }
         
-        // 2. 如果是「卡池名稱」有錯字：
-        if (r.banner === '這裡填舊的錯誤卡池名') { 
-            r.banner = '這裡填正確的卡池名'; 
+        // 自動比對字典並替換卡片名稱
+        if (r.card && TYPO_CORRECTIONS[r.card]) { 
+            r.card = TYPO_CORRECTIONS[r.card]; 
             changed = true; 
         }
     });
     
-    // 如果有發現錯字並進行了修改，就把更新後的資料存回資料庫
     if (changed) setDB(db);
 }
