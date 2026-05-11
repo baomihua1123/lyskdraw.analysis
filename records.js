@@ -198,3 +198,71 @@ function clearAll() {
         renderUI();
     }
 }
+// ── 手動拖曳排序功能 ───────────────────────────────────────
+let draggedRecordId = null;
+
+function handleDragStart(event, id) {
+    draggedRecordId = id;
+    // 設定拖曳效果為移動
+    event.dataTransfer.effectAllowed = "move";
+    // 讓原本被拖拉的卡片變半透明
+    setTimeout(() => {
+        event.target.style.opacity = "0.5";
+    }, 0);
+}
+
+function handleDragOver(event) {
+    // 必須取消預設行為，才能允許元素被放下 (Drop)
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    
+    // 尋找滑鼠目前碰到哪一張卡片
+    const card = event.target.closest('.h-record-card');
+    if (card && !card.classList.contains('drag-over')) {
+        card.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(event) {
+    const card = event.target.closest('.h-record-card');
+    if (card) {
+        card.classList.remove('drag-over');
+    }
+}
+
+function handleDragEnd(event) {
+    // 拖曳結束時，把透明度恢復，並清空所有的虛線框
+    event.target.style.opacity = "1";
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+function handleDrop(event, targetId) {
+    event.preventDefault();
+    
+    const card = event.target.closest('.h-record-card');
+    if (card) {
+        card.classList.remove('drag-over');
+    }
+
+    // 如果沒有抓到ID，或是自己放到自己身上，就不做事
+    if (!draggedRecordId || draggedRecordId === targetId) return;
+
+    const db = getDB();
+    
+    // 在資料庫中尋找被抓起的紀錄，以及被放下的目標紀錄
+    const draggedRecord = db.find(r => r.id === draggedRecordId);
+    const targetRecord = db.find(r => r.id === targetId);
+
+    if (draggedRecord && targetRecord) {
+        // C++ 中的 Swap 概念：交換兩者的時間戳記，藉此改變渲染時的排列順序
+        const tempTime = draggedRecord.time || draggedRecord._evTime || draggedRecord.id;
+        draggedRecord.time = targetRecord.time || targetRecord._evTime || targetRecord.id;
+        targetRecord.time = tempTime;
+
+        // 存檔並重新渲染畫面
+        setDB(db);
+        renderUI();
+    }
+    
+    draggedRecordId = null;
+}
