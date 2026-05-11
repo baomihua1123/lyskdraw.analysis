@@ -205,3 +205,52 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
     transform: scale(0.98);
     opacity: 0.8;
 }
+/* --- 響應式排版佈局 (電腦與平板橫屏) --- */
+@media (min-width: 1024px) {
+    .main-container {
+        display: flex;
+        flex-direction: row-reverse; /* 讓統計資訊（右側）與列表（左側）併排 */
+        align-items: flex-start;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* 右側：統計數據區塊 (包含限定幾抽必出) */
+    .stats-sidebar {
+        flex: 0 0 350px; /* 固定寬度 350px */
+        position: sticky;
+        top: 20px;
+    }
+
+    /* 左側：抽卡紀錄列表區塊 */
+    .records-main {
+        flex: 1; /* 自動填滿剩餘空間 */
+    }
+}
+
+/* --- 拖曳三條線圖示樣式 --- */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    color: var(--text-sub);
+    font-size: 18px;
+    cursor: grab;
+    user-select: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.h-record-card:hover .drag-handle {
+    opacity: 1;
+}
+
+/* 微調原本的卡片右側佈局，以便容納三條線 */
+.h-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
