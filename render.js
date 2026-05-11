@@ -146,15 +146,15 @@ function renderUI() {
         else if (r.res === 'wai_lim') { cardTypeStr = '💔 限定'; statusColor = '#ef4444'; }
         else                          { cardTypeStr = '☠️ 歪卡'; statusColor = '#475569'; }
 
-        // 程式邏輯：將卡片上的日期精確顯示到「年/月/日」
+        // 取得時間，並且只保留 [YY/MM] 的格式
         const d       = new Date(r.time || r._evTime || r.id);
         const dateStr = r.main === '常駐' && !r.time
             ? ''
-            : `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}]`;
+            : `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}]`;
 
         const isBlack    = r.pulls > 55 && r.pulls <= 62;
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
-        // 修正後的 return 區塊：垃圾桶在三條線前面
+
         return `
         <div class="h-record-card" draggable="true" 
              ondragstart="handleDragStart(event, ${r.id})" 
@@ -175,9 +175,7 @@ function renderUI() {
                 <div class="h-right">
                     <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
                     <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
-                    
                     <button class="del-btn-icon" onclick="deleteRec(${r.id})" title="刪除紀錄">🗑️</button>
-                    
                     <div class="drag-handle" title="按住拖曳來排序">☰</div>
                 </div>
             </div>
