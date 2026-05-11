@@ -94,11 +94,11 @@
                 </div>
             </div>
 
-          <!-- 替換 index.html 中的這一段 -->
             <div class="form-group">
-                <label class="group-label">4. 抽卡日期與花費抽數 (1~70)</label>
+                <label class="group-label">4. 抽卡月份與花費抽數 (1~70)</label>
                 <div style="display: flex; gap: 10px;">
-                    <input type="date" id="pullDate" style="flex: 1;" title="選擇抽卡日期">
+                    <!-- 這裡將 type="date" 改為 type="month" -->
+                    <input type="month" id="pullDate" style="flex: 1;" title="選擇抽卡月份">
                     <input type="number" id="pulls" placeholder="距離上次出金花費抽數" style="flex: 1;" min="1" max="70" onkeydown="if(event.key === 'Enter') addRecord()">
                 </div>
             </div>
