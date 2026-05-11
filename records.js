@@ -113,7 +113,7 @@ function addRecord() {
     const pulledLead = document.querySelector('input[name="pulledLead"]:checked').value;
     const card       = document.getElementById('cardName').value.trim();
     const pulls      = parseInt(document.getElementById('pulls').value);
-    const pullDate   = document.getElementById('pullDate').value; // 程式邏輯：讀取新增的日期欄位
+    const pullDate   = document.getElementById('pullDate').value; 
 
     if (!banner)                              return alert('請輸入卡池名稱！');
     if (isNaN(pulls) || pulls < 1 || pulls > 70) return alert('請輸入 1-70 抽！');
@@ -134,10 +134,12 @@ function addRecord() {
     const poolKey  = main === '限定' ? 'lim' : (main === '復刻' ? 're' : 'std');
     const currentP = getP(poolKey);
 
-    // 程式邏輯：如果有選日期，將其轉換為電腦看得懂的時間戳記；若未選，預設為「現在」
-    const recordTime = pullDate ? new Date(pullDate).getTime() : Date.now();
+    // 取得卡池的預設時間
+    const eventTime = getEventDate(banner, main);
+    
+    // 調整後的優先級：卡池預設時間 > 手動輸入月份 > 當下的時間
+    const recordTime = eventTime ? eventTime : (pullDate ? new Date(`${pullDate}-01T00:00:00`).getTime() : Date.now());
 
-    // 程式邏輯：把 time 屬性正式存入資料結構中
     const rec = { id: Date.now(), time: recordTime, main, sub, lead: pulledLead, banner, card, pulls, res: judgeResult };
 
     if (judgeResult === 'target' || judgeResult === 'std') {
@@ -153,13 +155,11 @@ function addRecord() {
     db.push(rec);
     setDB(db);
     
-    // 清空輸入框狀態，準備下一次輸入
     document.getElementById('cardName').value = '';
     document.getElementById('pulls').value    = '';
     document.getElementById('pullDate').value = ''; 
     renderUI();
 }
-
 // ── 刪除紀錄 ───────────────────────────────────────────────
 function deleteRec(id) {
     const db  = getDB();
