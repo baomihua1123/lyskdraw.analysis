@@ -81,7 +81,7 @@ p.subtitle { color: var(--text-sub); font-size: 13px; margin: 6px 0 0 0; }
 
 .form-group { margin-bottom: 16px; }
 label.group-label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-sub); font-weight: bold; }
-input[type="text"], input[type="number"] { width: 100%; padding: 10px; background-color: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+input[type="text"], input[type="number"], input[type="date"] {width: 100%; padding: 10px; background-color: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
 input::-webkit-calendar-picker-indicator { display: none !important; }
 
 .radio-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
