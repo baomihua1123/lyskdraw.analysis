@@ -56,7 +56,6 @@ function loadOshis() {
     });
     updateOshiSummary();
 }
-
 // ── 主渲染函式 ─────────────────────────────────────────────
 function renderUI() {
     document.getElementById('pLim').innerText = 140 - getP('lim');
@@ -190,83 +189,6 @@ function renderUI() {
         }
     }
 }
-
-// ── 紀錄列表與分頁 ──
-    const filterSelect = document.getElementById('recordFilterSelect');
-    const filterVal    = filterSelect ? filterSelect.value : '全部';
-    const displayDb    = filterVal !== '全部' ? db.filter(r => r.main === filterVal) : db;
-
-    // 分頁邏輯設定 (一頁 10 筆)
-    const itemsPerPage = 10;
-    // 計算總頁數，Math.ceil 是無條件進位 (例如 11 筆資料 / 10 = 1.1，進位成 2 頁)
-    const totalPages = Math.max(1, Math.ceil(displayDb.length / itemsPerPage));
-    
-    // 安全機制：確保目前頁數不會超出合理範圍 (例如刪除最後一頁的資料時，會自動往前縮一頁)
-    if (window.currentPage > totalPages) {
-        window.currentPage = totalPages;
-    } else if (window.currentPage < 1) {
-        window.currentPage = 1;
-    }
-
-    // 計算這頁要從第幾筆開始抓 (類似 C++ 陣列的 Index 計算)
-    const startIndex = (window.currentPage - 1) * itemsPerPage;
-    // array.slice 會切出一小段新陣列給我們渲染
-    const paginatedDb = displayDb.slice(startIndex, startIndex + itemsPerPage);
-
-    document.getElementById('recordList').innerHTML = paginatedDb.map(r => {
-        let cardTypeStr, statusColor;
-        if      (r.main === '常駐')   { cardTypeStr = '🎫 常駐'; statusColor = '#3b82f6'; }
-        else if (r.res === 'target')  { cardTypeStr = '🎯 限定'; statusColor = 'var(--primary)'; }
-        else if (r.res === 'wai_lim') { cardTypeStr = '💔 限定'; statusColor = '#ef4444'; }
-        else                          { cardTypeStr = '☠️ 歪卡'; statusColor = '#475569'; }
-
-        const d       = new Date(r._evTime || r.id);
-        const dateStr = r.main === '常駐'
-            ? ''
-            : (r._evTime
-                ? `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}]`
-                : '[無期效]');
-
-        const isBlack    = r.pulls > 55 && r.pulls <= 62;
-        const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
-
-        return `
-        <div class="h-record-card">
-            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
-            <div class="h-content">
-                <div class="h-left">
-                    <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''}${subTagHtml}<span class="tag" style="background-color: ${statusColor};">${cardTypeStr}</span></div>
-                    <span class="h-title">
-                        <span style="font-size: 15px; font-weight: bold; color: var(--text-main);">${r.card || '未知'}</span>
-                        <span style="font-size: 12px; font-weight: normal;"> | ${r.banner}</span>
-                        <span class="h-date">${dateStr}</span>
-                    </span>
-                </div>
-                <div class="h-right">
-                    <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
-                    <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
-                    <button class="del-btn-icon" onclick="deleteRec(${r.id})">🗑️</button>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-
-    // 算繪下方的分頁按鈕
-    const paginationEl = document.getElementById('paginationControls');
-    if (paginationEl) {
-        // 只有資料超過 1 頁 (大於 10 筆) 時才顯示按鈕
-        if (displayDb.length > itemsPerPage) {
-            paginationEl.innerHTML = `
-                <button class="page-btn" onclick="changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>◀ 上一頁</button>
-                <span class="page-info">第 ${window.currentPage} / ${totalPages} 頁</span>
-                <button class="page-btn" onclick="changePage(1)" ${window.currentPage === totalPages ? 'disabled' : ''}>下一頁 ▶</button>
-            `;
-        } else {
-            paginationEl.innerHTML = '';
-        }
-    }
-}
-
 // ── 啟動 ───────────────────────────────────────────────────
 migrateDB();
 initTheme();
