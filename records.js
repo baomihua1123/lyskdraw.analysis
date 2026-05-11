@@ -106,8 +106,6 @@ function editPending(type) {
 }
 
 // ── 新增紀錄 ───────────────────────────────────────────────
-// records.js
-// 替換原有的 addRecord() 函式
 function addRecord() {
     const banner     = document.getElementById('bannerName').value.trim();
     const main       = document.querySelector('input[name="mainPool"]:checked').value;
