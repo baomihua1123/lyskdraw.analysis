@@ -106,6 +106,8 @@ function editPending(type) {
 }
 
 // ── 新增紀錄 ───────────────────────────────────────────────
+// records.js
+// 替換原有的 addRecord() 函式
 function addRecord() {
     const banner     = document.getElementById('bannerName').value.trim();
     const main       = document.querySelector('input[name="mainPool"]:checked').value;
@@ -113,6 +115,7 @@ function addRecord() {
     const pulledLead = document.querySelector('input[name="pulledLead"]:checked').value;
     const card       = document.getElementById('cardName').value.trim();
     const pulls      = parseInt(document.getElementById('pulls').value);
+    const pullDate   = document.getElementById('pullDate').value; // 程式邏輯：讀取新增的日期欄位
 
     if (!banner)                              return alert('請輸入卡池名稱！');
     if (isNaN(pulls) || pulls < 1 || pulls > 70) return alert('請輸入 1-70 抽！');
@@ -133,7 +136,11 @@ function addRecord() {
     const poolKey  = main === '限定' ? 'lim' : (main === '復刻' ? 're' : 'std');
     const currentP = getP(poolKey);
 
-    const rec = { id: Date.now(), main, sub, lead: pulledLead, banner, card, pulls, res: judgeResult };
+    // 程式邏輯：如果有選日期，將其轉換為電腦看得懂的時間戳記；若未選，預設為「現在」
+    const recordTime = pullDate ? new Date(pullDate).getTime() : Date.now();
+
+    // 程式邏輯：把 time 屬性正式存入資料結構中
+    const rec = { id: Date.now(), time: recordTime, main, sub, lead: pulledLead, banner, card, pulls, res: judgeResult };
 
     if (judgeResult === 'target' || judgeResult === 'std') {
         rec.total = currentP + pulls;
@@ -147,8 +154,11 @@ function addRecord() {
     const db = getDB();
     db.push(rec);
     setDB(db);
+    
+    // 清空輸入框狀態，準備下一次輸入
     document.getElementById('cardName').value = '';
     document.getElementById('pulls').value    = '';
+    document.getElementById('pullDate').value = ''; 
     renderUI();
 }
 
