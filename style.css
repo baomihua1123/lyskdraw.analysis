@@ -211,6 +211,7 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
     align-items: center;
     justify-content: center;
     padding: 0 4px;
+    margin-right: 4px; /* 加入這行，讓它不要貼死在最右邊 */
     color: var(--text-sub);
     font-size: 16px;
     cursor: grab;
@@ -218,7 +219,6 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
     opacity: 0.3;
     transition: opacity 0.2s;
 }
-
 .h-record-card:hover .drag-handle {
     opacity: 1;
 }
