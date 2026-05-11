@@ -101,11 +101,11 @@ function updateBannerRecommendations() {
 
     if (mainPool === '常駐') {
         if (subPoolGroup) subPoolGroup.style.opacity = '0.3';
-        dropdownData.bannerName = ['極空迴音'];
+        dropdownData.bannerName = ['極空迴響'];
         dropdownData.upCardName = typeof standardCards !== 'undefined'
             ? [...new Set(Object.values(standardCards).flat())]
             : [];
-        document.getElementById('bannerName').value = '極空迴音';
+        document.getElementById('bannerName').value = '極空迴響';
         return;
     }
 
@@ -158,7 +158,7 @@ window.autoFillFromUpCard = function () {
 // ── 自動填入：以卡池名稱填入子池類型 ─────────────────────
 window.autoFillBannerInfo = function (forcedEvent = null) {
     const bannerName = document.getElementById('bannerName').value;
-    if (bannerName === '極空迴音') return;
+    if (bannerName === '極空迴響') return;
 
     const event = forcedEvent || findEvent(
         bannerName,
@@ -177,7 +177,7 @@ window.updatePulledCardList = function () {
     const bannerName = document.getElementById('bannerName').value;
     const pulledLead = document.querySelector('input[name="pulledLead"]:checked').value;
     let options = [];
-    if (bannerName && bannerName !== '極空迴音' && typeof eventCards !== 'undefined') {
+    if (bannerName && bannerName !== '極空迴響' && typeof eventCards !== 'undefined') {
         const event = findEvent(
             bannerName,
             document.querySelector('input[name="mainPool"]:checked').value
@@ -207,7 +207,7 @@ window.autoFillFromOCR = function (pulls, cardName, latestTime, pendingPulls, ra
 
     if (poolName === '常駐') {
         document.querySelector(`input[name="mainPool"][value="常駐"]`).checked = true;
-        document.getElementById('bannerName').value = '極空迴音';
+        document.getElementById('bannerName').value = '極空迴響';
         onPoolChange();
         return;
     }
