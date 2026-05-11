@@ -106,6 +106,7 @@ function editPending(type) {
 }
 
 // ── 新增紀錄 ───────────────────────────────────────────────
+// 替換 records.js 裡原有的 addRecord() 函式
 function addRecord() {
     const banner     = document.getElementById('bannerName').value.trim();
     const main       = document.querySelector('input[name="mainPool"]:checked').value;
@@ -113,7 +114,6 @@ function addRecord() {
     const pulledLead = document.querySelector('input[name="pulledLead"]:checked').value;
     const card       = document.getElementById('cardName').value.trim();
     const pulls      = parseInt(document.getElementById('pulls').value);
-    const pullDate   = document.getElementById('pullDate').value; 
 
     if (!banner)                              return alert('請輸入卡池名稱！');
     if (isNaN(pulls) || pulls < 1 || pulls > 70) return alert('請輸入 1-70 抽！');
@@ -134,11 +134,9 @@ function addRecord() {
     const poolKey  = main === '限定' ? 'lim' : (main === '復刻' ? 're' : 'std');
     const currentP = getP(poolKey);
 
-    // 取得卡池的預設時間
+    // 取得卡池的預設時間，若無預設時間（例如常駐池）則抓取當下系統時間
     const eventTime = getEventDate(banner, main);
-    
-    // 調整後的優先級：卡池預設時間 > 手動輸入月份 > 當下的時間
-    const recordTime = eventTime ? eventTime : (pullDate ? new Date(`${pullDate}-01T00:00:00`).getTime() : Date.now());
+    const recordTime = eventTime ? eventTime : Date.now();
 
     const rec = { id: Date.now(), time: recordTime, main, sub, lead: pulledLead, banner, card, pulls, res: judgeResult };
 
@@ -157,7 +155,6 @@ function addRecord() {
     
     document.getElementById('cardName').value = '';
     document.getElementById('pulls').value    = '';
-    document.getElementById('pullDate').value = ''; 
     renderUI();
 }
 // ── 刪除紀錄 ───────────────────────────────────────────────
