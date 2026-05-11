@@ -259,7 +259,7 @@ const eventCards = [
   {
     year: "2025",
     duration: "2.10-2.27",
-    eventName: "明日無處可選",
+    eventName: "明日無處可逃",
     poolType: "混池1",
     cards: {
       "沈星回": ["虛構妄想"],
