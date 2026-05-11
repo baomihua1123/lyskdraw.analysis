@@ -94,12 +94,15 @@
                 </div>
             </div>
 
+            <!-- 替換 index.html 裡的第 4 點區塊，並補回新增紀錄按鈕 -->
             <div class="form-group">
                 <label class="group-label">4. 花費抽數 (1~70)</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="number" id="pulls" placeholder="距離上次出金花費抽數" style="flex: 1;" min="1" max="70" onkeydown="if(event.key === 'Enter') addRecord()">
                 </div>
             </div>
+            
+            <button class="main-btn" onclick="addRecord()">✨ 新增紀錄</button>
         </div> 
         
         <div class="right-col">
