@@ -15,9 +15,10 @@ function exportData() {
         POOL_KEYS.map(k => [`p_${k}`, localStorage.getItem(`p_${k}`) || '0'])
     );
     const data = {
-        db_v4: JSON.parse(localStorage.getItem('db_v4')) || [],
+        // 加入 || '[]' 的防呆機制，避免解析 null 或空字串時出錯
+        db_v4: JSON.parse(localStorage.getItem('db_v4') || '[]'),
         ...pendingData,
-        oshis: JSON.parse(localStorage.getItem('oshis')) || []
+        oshis: JSON.parse(localStorage.getItem('oshis') || '[]')
     };
 
     // 2. 序列化為易讀的 JSON 格式（縮排 2 格）
@@ -36,7 +37,8 @@ function exportData() {
 
     // 4. 下載完畢後清理虛擬連結，防止記憶體洩漏
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // 延遲釋放 URL，確保所有瀏覽器都有足夠時間啟動下載任務
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ── 匯入 ─────────────────────────────────────────────────
