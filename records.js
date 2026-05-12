@@ -58,10 +58,10 @@ function getLuckHtml(avgPulls, isTarget) {
     if (avgPulls === 0) return '<span style="color:var(--text-sub)">---</span>';
 
     const pullCount   = Math.max(1, Math.min(140, Math.round(avgPulls)));
-    const beatPercent = (typeof beatPercentTable !== 'undefined') ? beatPercentTable[pullCount] : 0;
-
-    // 依池型選擇對應的等級計算方式
-    const rank          = isTarget ? getLuckRankByPercent(beatPercent) : getLuckRankByPulls(avgPulls);
+    // 改後
+    const table       = isTarget ? beatPercentTable : standardBeatPercentTable;
+    const beatPercent = (typeof table !== 'undefined') ? (table[pullCount] ?? 0) : 0;
+    const rank        = getLuckRankByPercent(beatPercent); // 兩種池型都用百分比判斷
     const { cls, label } = LUCK_HTML_LEVELS[rank];
 
     const mainHtml    = `<span class="${cls}">${label}</span>`;
