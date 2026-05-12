@@ -27,7 +27,8 @@ const KNOWN_CARDS = (() => {
 
 // ── handleOCR ────────────────────────────────────────────
 async function handleOCR(event) {
-    const files = event.target.files;
+    const inputEl = event.target;
+    const files = inputEl.files;
     if (!files || files.length === 0) return;
     const statusEl = document.getElementById('ocrStatus');
     statusEl.innerText = `⏳ 辨識中... (0/${files.length})`;
@@ -103,6 +104,9 @@ async function handleOCR(event) {
     } catch (err) {
         statusEl.innerText = '❌ 失敗：' + (err.message || '未知');
         statusEl.style.color = '#ef4444';
+    } finally {
+        // 【新增】無論成功或失敗，都清空 input，讓使用者能重複上傳同一張截圖
+        inputEl.value = '';
     }
 }
 
