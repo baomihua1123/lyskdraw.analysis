@@ -717,6 +717,5 @@ const eventCards = [
     cards: {
       "黎深": ["專屬教學"]
     }
-  },
-
+  }
 ];
