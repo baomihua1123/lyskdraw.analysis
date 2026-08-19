@@ -26,59 +26,145 @@ const KNOWN_CARDS = (() => {
 })();
 
 // ── handleOCR ────────────────────────────────────────────
+//    OCR 診斷版
+//    功能與原本相同，但會額外檢查：
+//    「OCR文字星級」與「顏色星級」是否發生衝突。
+
 async function handleOCR(event) {
     const inputEl = event.target;
     const files = inputEl.files;
+
     if (!files || files.length === 0) return;
+
     const statusEl = document.getElementById('ocrStatus');
+
     statusEl.innerText = `⏳ 辨識中... (0/${files.length})`;
     statusEl.style.color = '#c084fc';
 
     try {
-        let pages = []; let warnings = [];
+        let pages = [];
+        let warnings = [];
 
         for (let i = 0; i < files.length; i++) {
-            statusEl.innerText = `⏳ 辨識中... (${i + 1}/${files.length})`;
-            const records = await extractRecordsFromImage(files[i]);
+            statusEl.innerText =
+                `⏳ 辨識中... (${i + 1}/${files.length})`;
 
-            if (records.length < 5) warnings.push(`第 ${i + 1} 張僅讀取到 ${records.length} 筆`);
+            const records =
+                await extractRecordsFromImage(files[i]);
+
+            // 記錄這些 OCR 紀錄來自第幾張圖片
+            records.forEach(record => {
+                record._ocrPage = i + 1;
+            });
+
+            if (records.length < 5) {
+                warnings.push(
+                    `第 ${i + 1} 張僅讀取到 ${records.length} 筆`
+                );
+            }
+
             if (records.length > 0) {
-                // 找出本頁有真實時間戳記的紀錄，作為頁面排序依據
-                const validTimeRecord = records.find(r => r._hasRealTime);
-                records._pageTime = validTimeRecord ? validTimeRecord.time : 0;
+
+                // 找出本頁有真實時間戳記的紀錄，
+                // 作為頁面排序依據
+                const validTimeRecord =
+                    records.find(r => r._hasRealTime);
+
+                records._pageTime =
+                    validTimeRecord
+                        ? validTimeRecord.time
+                        : 0;
+
                 pages.push(records);
             }
         }
+
         if (pages.length === 0) {
-            statusEl.innerText = '⚠️ 未能辨識，請確認截圖清晰';
+            statusEl.innerText =
+                '⚠️ 未能辨識，請確認截圖清晰';
+
             statusEl.style.color = '#facc15';
             return;
         }
 
-        // 依頁面時間由新到舊排序，再攤平成一維陣列
-        pages.sort((a, b) => b._pageTime - a._pageTime);
+        // ── 依頁面時間由新到舊排序 ────────────────────────
+        pages.sort(
+            (a, b) => b._pageTime - a._pageTime
+        );
+
+        // 攤平成一維陣列
         const allRecords = pages.flat();
+
+        // ── 星級診斷統計 ───────────────────────────────────
+        const starConflicts = allRecords.filter(
+            r => r._starDebug?.conflict
+        );
+
+        // 將診斷結果寫入 console，
+        // 方便之後需要進一步分析時查看
+        if (starConflicts.length > 0) {
+            console.group(
+                '🔍 OCR 星級判定診斷'
+            );
+
+            console.table(
+                starConflicts.map(r => ({
+                    圖片: r._ocrPage,
+                    卡名: r.name,
+                    原始文字: r.raw,
+                    OCR文字星級:
+                        r._starDebug.textStar,
+                    顏色判定星級:
+                        r._starDebug.colorStar,
+                    最終判定:
+                        r._starDebug.finalStar
+                }))
+            );
+
+            console.groupEnd();
+        }
+
         const result = countPulls(allRecords);
 
         if (result.pullEvents.length > 0) {
-            // 保留舊資料優先邏輯：多張五星時從最舊的一筆開始補登
-            const targetGold = result.pullEvents[result.pullEvents.length - 1];
-            const pendingPulls = result.pendingPulls;
+
+            // 保留舊資料優先邏輯：
+            // 多張五星時從最舊的一筆開始補登
+            const targetGold =
+                result.pullEvents[
+                    result.pullEvents.length - 1
+                ];
+
+            const pendingPulls =
+                result.pendingPulls;
 
             let finalPoolName = null;
 
             // 輔助：判斷卡名是否為常駐池卡片
             const isStandard = (name) => {
-                if (!name || typeof standardCards === 'undefined') return false;
-                return Object.values(standardCards).some(list => list.includes(name));
+                if (
+                    !name ||
+                    typeof standardCards === 'undefined'
+                ) {
+                    return false;
+                }
+
+                return Object.values(standardCards)
+                    .some(list => list.includes(name));
             };
 
-            // 連續兩次五星皆為常駐卡 → 判定為常駐池
-            if (isStandard(targetGold.name) && isStandard(targetGold.prevName)) {
+            // 連續兩次五星皆為常駐卡
+            // → 判定為常駐池
+            if (
+                isStandard(targetGold.name) &&
+                isStandard(targetGold.prevName)
+            ) {
                 finalPoolName = '常駐';
             }
 
-            if (typeof window.autoFillFromOCR === 'function') {
+            if (
+                typeof window.autoFillFromOCR === 'function'
+            ) {
                 window.autoFillFromOCR(
                     targetGold.pulls,
                     targetGold.name,
@@ -89,24 +175,111 @@ async function handleOCR(event) {
                 );
             }
 
+            // ── 建立原本的結果通知 ────────────────────────
             let resText = `✅ 辨識完成！`;
-            if (finalPoolName) resText += `（${finalPoolName}）`;
+
+            if (finalPoolName) {
+                resText += `（${finalPoolName}）`;
+            }
+
             resText += `\n\n`;
-            [...result.pullEvents].reverse().forEach(evt => { resText += `${evt.name}：${evt.pulls} 抽\n`; });
-            if (pendingPulls > 0) resText += `\n💡 偵測到出金後已墊 ${pendingPulls} 抽`;
-            if (warnings.length > 0) resText += `\n(⚠️ ${warnings.join('；')})`;
+
+            [...result.pullEvents]
+                .reverse()
+                .forEach(evt => {
+                    resText +=
+                        `${evt.name}：${evt.pulls} 抽\n`;
+                });
+
+            if (pendingPulls > 0) {
+                resText +=
+                    `\n💡 偵測到出金後已墊 ${pendingPulls} 抽`;
+            }
+
+            // ── 加入星級判定衝突資訊 ──────────────────────
+            if (starConflicts.length > 0) {
+
+                resText +=
+                    `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
+
+                // 最多顯示 10 筆，避免通知過長
+                starConflicts
+                    .slice(0, 10)
+                    .forEach(r => {
+
+                        resText +=
+                            `\n第${r._ocrPage}張｜${r.name}`;
+
+                        resText +=
+                            `｜文字${r._starDebug.textStar}星`;
+
+                        resText +=
+                            `｜顏色${r._starDebug.colorStar}星`;
+
+                        resText +=
+                            `｜採用${r._starDebug.finalStar}星`;
+                    });
+
+                if (starConflicts.length > 10) {
+                    resText +=
+                        `\n……其餘 ${starConflicts.length - 10} 筆請查看 Console`;
+                }
+            }
+
+            if (warnings.length > 0) {
+                resText +=
+                    `\n(⚠️ ${warnings.join('；')})`;
+            }
+
             statusEl.innerText = resText;
             statusEl.style.color = '#4ade80';
+
         } else {
-            statusEl.innerText = `⚠️ 只找到 ${result.fiveStarCount} 個5星 (需至少2個才能計算，請確認截圖範圍)`;
+
+            let warningText =
+                `⚠️ 只找到 ${result.fiveStarCount} 個5星 ` +
+                `(需至少2個才能計算，請確認截圖範圍)`;
+
+            // 即使五星不足，也要顯示星級衝突
+            if (starConflicts.length > 0) {
+
+                warningText +=
+                    `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
+
+                starConflicts
+                    .slice(0, 10)
+                    .forEach(r => {
+
+                        warningText +=
+                            `\n第${r._ocrPage}張｜${r.name}`;
+
+                        warningText +=
+                            `｜文字${r._starDebug.textStar}星`;
+
+                        warningText +=
+                            `｜顏色${r._starDebug.colorStar}星`;
+
+                        warningText +=
+                            `｜採用${r._starDebug.finalStar}星`;
+                    });
+            }
+
+            statusEl.innerText = warningText;
             statusEl.style.color = '#facc15';
         }
+
     } catch (err) {
-        statusEl.innerText = '❌ 失敗：' + (err.message || '未知');
+
+        statusEl.innerText =
+            '❌ 失敗：' +
+            (err.message || '未知');
+
         statusEl.style.color = '#ef4444';
-    } finally {
-        // 【新增】無論成功或失敗，都清空 input，讓使用者能重複上傳同一張截圖
-        inputEl.value = '';
+
+        console.error(
+            'OCR Error:',
+            err
+        );
     }
 }
 
@@ -335,7 +508,23 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
             if (!isNaN(parsed)) { time = parsed; lastTime = parsed; hasRealTime = true; }
         }
 
-        records.push({ star, time, name: cardName, raw: rawText, _hasRealTime: hasRealTime });
+        // ── 保存 OCR 診斷資訊 ─────────────────────────────────────
+        //    不影響原本資料格式，只額外增加 _starDebug。
+        records.push({
+            star,
+            time,
+            name: cardName,
+            raw: rawText,
+            _hasRealTime: hasRealTime,
+
+            // 星級診斷資訊
+            _starDebug: {
+                textStar,
+                colorStar,
+                finalStar: star,
+                conflict: starConflict
+            }
+});
     }
     return records;
 }
