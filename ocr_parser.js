@@ -164,22 +164,64 @@ async function extractRecordsFromImage(file) {
 
 // ── detectStarFromColor ───────────────────────────────────
 //    分析指定行的像素顏色，判斷星級：
-//    金色（橘紅主色）→ 5星，藍紫色 → 4星，其餘 → 3星
+//    金色（橘紅主色）→ 5星
+//    藍紫色 → 4星
+//    其餘 → 3星
+//
+//    ⚠️ 診斷版：保留原本判定邏輯，不直接修改結果。
+//    目的只是讓 parseOCRLines 同時取得顏色判定結果，
+//    再與 OCR 文字判定結果進行比較。
+
 function detectStarFromColor(colorCanvas, bbox, cropTop) {
     const y0 = Math.max(0, bbox.y0 + cropTop);
     const h  = bbox.y1 - bbox.y0;
+
     if (h <= 0) return null;
-    const ctx  = colorCanvas.getContext('2d');
-    const data = ctx.getImageData(0, y0, colorCanvas.width, h).data;
-    let gCount = 0, pCount = 0;
+
+    const ctx = colorCanvas.getContext('2d');
+    const data = ctx.getImageData(
+        0,
+        y0,
+        colorCanvas.width,
+        h
+    ).data;
+
+    let gCount = 0;
+    let pCount = 0;
+
     for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i + 1], b = data[i + 2];
-        if (r > 140 && r > g && g > b && (r - b) > 35) gCount++; // 金色（5星）
-        else if (b > r && b > g && (b - r) > 25 && b > 120) pCount++; // 藍紫色（4星）
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // 金色（5星）
+        if (
+            r > 140 &&
+            r > g &&
+            g > b &&
+            (r - b) > 35
+        ) {
+            gCount++;
+        }
+
+        // 藍紫色（4星）
+        else if (
+            b > r &&
+            b > g &&
+            (b - r) > 25 &&
+            b > 120
+        ) {
+            pCount++;
+        }
     }
+
     const totalPixels = data.length / 4;
+
+    if (totalPixels <= 0) return null;
+
     if (gCount / totalPixels > 0.003) return 5;
     if (pCount / totalPixels > 0.003) return 4;
+
     return 3;
 }
 
@@ -209,10 +251,40 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
         const hasDate    = /202\d/.test(rawText) || /-\d{2}-\d{2}/.test(rawText);
         if (!hasName && !hasStarStr && !hasDate) continue;
 
-        // 優先用顏色辨識星級，顏色失敗才 fallback 到文字比對
-        const star = detectStarFromColor(colorCanvas, row.bbox, cropTop)
-            || (/(5|S|s|五|§)[星生皇里室量]/.test(textNoSpace) ? 5
-                : (/(4|A|a|四)[星生皇里室量]/.test(textNoSpace) ? 4 : 3));
+        // ── 星級雙重診斷 ──────────────────────────────────────────
+        //    同時取得：
+        //    1. OCR 文字判定
+        //    2. 圖片顏色判定
+        //    3. 最終實際採用的判定
+        //
+        //    ⚠️ 目前仍維持「顏色優先」的原本邏輯。
+        //    此階段只用來找出兩種判定是否發生衝突。
+
+        // ① OCR 文字判定
+        let textStar = null;
+
+        if (/5星/.test(textNoSpace)) {
+            textStar = 5;
+        } else if (/4星/.test(textNoSpace)) {
+            textStar = 4;
+        } else if (/3星/.test(textNoSpace)) {
+            textStar = 3;
+        }
+        // ② 顏色判定
+                const colorStar = detectStarFromColor(
+                    colorCanvas,
+                    row.bbox,
+                    cropTop
+                );
+
+        // ③ 維持目前程式的「顏色優先」邏輯
+        const star = colorStar ?? textStar ?? 3;
+
+        // ④ 記錄兩種判定是否衝突
+        const starConflict =
+            textStar !== null &&
+            colorStar !== null &&
+            textStar !== colorStar;
 
         // ── 卡名比對（三段式，由精確到模糊）─────────────────
         let cardName = '未知';
