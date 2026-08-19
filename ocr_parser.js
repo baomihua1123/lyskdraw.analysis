@@ -208,16 +208,22 @@ async function handleOCR(event) {
                     .forEach(r => {
 
                         resText +=
-                            `\n第${r._ocrPage}張｜${r.name}`;
+    `\n第${r._ocrPage}張｜${r.name}`;
 
-                        resText +=
-                            `｜文字${r._starDebug.textStar}星`;
+resText +=
+    `｜文字${r._starDebug.textStar}星`;
 
-                        resText +=
-                            `｜顏色${r._starDebug.colorStar}星`;
+resText +=
+    `｜顏色${r._starDebug.colorStar}星`;
 
-                        resText +=
-                            `｜採用${r._starDebug.finalStar}星`;
+resText +=
+    `｜採用${r._starDebug.finalStar}星`;
+
+resText +=
+    `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
+
+resText +=
+    `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
                     });
 
                 if (starConflicts.length > 10) {
@@ -367,7 +373,7 @@ function detectStarFromColor(colorCanvas, bbox, cropTop) {
         const g = data[i + 1];
         const b = data[i + 2];
 
-        // 金色（5星）
+        // 金色（目前 5 星判定條件）
         if (
             r > 140 &&
             r > g &&
@@ -377,7 +383,7 @@ function detectStarFromColor(colorCanvas, bbox, cropTop) {
             gCount++;
         }
 
-        // 藍紫色（4星）
+        // 藍紫色（目前 4 星判定條件）
         else if (
             b > r &&
             b > g &&
@@ -392,10 +398,30 @@ function detectStarFromColor(colorCanvas, bbox, cropTop) {
 
     if (totalPixels <= 0) return null;
 
-    if (gCount / totalPixels > 0.003) return 5;
-    if (pCount / totalPixels > 0.003) return 4;
+    const goldRatio = gCount / totalPixels;
+    const purpleRatio = pCount / totalPixels;
 
-    return 3;
+    let star;
+
+    if (goldRatio > 0.003) {
+        star = 5;
+    } else if (purpleRatio > 0.003) {
+        star = 4;
+    } else {
+        star = 3;
+    }
+
+    // 回傳完整診斷資訊
+    return {
+        star,
+        goldRatio,
+        purpleRatio,
+        goldPixels: gCount,
+        purplePixels: pCount,
+        totalPixels,
+        y0,
+        height: h
+    };
 }
 
 // ── parseOCRLines ─────────────────────────────────────────
@@ -519,11 +545,20 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
 
             // 星級診斷資訊
             _starDebug: {
-                textStar,
-                colorStar,
-                finalStar: star,
-                conflict: starConflict
-            }
+    textStar,
+    colorStar,
+    finalStar: star,
+    conflict: starConflict,
+
+    // 顏色分析詳細資料
+    goldRatio: colorDebug?.goldRatio ?? null,
+    purpleRatio: colorDebug?.purpleRatio ?? null,
+    goldPixels: colorDebug?.goldPixels ?? 0,
+    purplePixels: colorDebug?.purplePixels ?? 0,
+    totalPixels: colorDebug?.totalPixels ?? 0,
+    colorY: colorDebug?.y0 ?? null,
+    colorHeight: colorDebug?.height ?? null
+}
 });
     }
     return records;
