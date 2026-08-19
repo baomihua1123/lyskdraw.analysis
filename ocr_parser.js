@@ -402,7 +402,6 @@ function detectStarFromColor(colorCanvas, bbox, cropTop) {
     const purpleRatio = pCount / totalPixels;
 
     let star;
-
     if (goldRatio > 0.003) {
         star = 5;
     } else if (purpleRatio > 0.003) {
@@ -410,7 +409,6 @@ function detectStarFromColor(colorCanvas, bbox, cropTop) {
     } else {
         star = 3;
     }
-
     // 回傳完整診斷資訊
     return {
         star,
@@ -459,31 +457,40 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
         //    ⚠️ 目前仍維持「顏色優先」的原本邏輯。
         //    此階段只用來找出兩種判定是否發生衝突。
 
-        // ① OCR 文字判定
-        let textStar = null;
+// ── 星級判定與診斷 ────────────────────────────────────────
 
-        if (/5星/.test(textNoSpace)) {
-            textStar = 5;
-        } else if (/4星/.test(textNoSpace)) {
-            textStar = 4;
-        } else if (/3星/.test(textNoSpace)) {
-            textStar = 3;
-        }
-        // ② 顏色判定
-                const colorStar = detectStarFromColor(
-                    colorCanvas,
-                    row.bbox,
-                    cropTop
-                );
+// ① OCR 文字判定
+let textStar = null;
 
-        // ③ 維持目前程式的「顏色優先」邏輯
-        const star = colorStar ?? textStar ?? 3;
+if (/5星/.test(textNoSpace)) {
+    textStar = 5;
+} else if (/4星/.test(textNoSpace)) {
+    textStar = 4;
+} else if (/3星/.test(textNoSpace)) {
+    textStar = 3;
+}
 
-        // ④ 記錄兩種判定是否衝突
-        const starConflict =
-            textStar !== null &&
-            colorStar !== null &&
-            textStar !== colorStar;
+// ② 顏色判定
+// detectStarFromColor 現在回傳完整診斷物件
+const colorDebug = detectStarFromColor(
+    colorCanvas,
+    row.bbox,
+    cropTop
+);
+
+const colorStar = colorDebug
+    ? colorDebug.star
+    : null;
+
+// ③ 目前仍維持「顏色優先」
+//    這次只是診斷，不改原本判定邏輯
+const star = colorStar ?? textStar ?? 3;
+
+// ④ 判斷 OCR 與顏色是否衝突
+const starConflict =
+    textStar !== null &&
+    colorStar !== null &&
+    textStar !== colorStar;
 
         // ── 卡名比對（三段式，由精確到模糊）─────────────────
         let cardName = '未知';
@@ -537,28 +544,48 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
         // ── 保存 OCR 診斷資訊 ─────────────────────────────────────
         //    不影響原本資料格式，只額外增加 _starDebug。
         records.push({
-            star,
-            time,
-            name: cardName,
-            raw: rawText,
-            _hasRealTime: hasRealTime,
+    star,
+    time,
+    name: cardName,
+    raw: rawText,
+    _hasRealTime: hasRealTime,
 
-            // 星級診斷資訊
-            _starDebug: {
-    textStar,
-    colorStar,
-    finalStar: star,
-    conflict: starConflict,
+    // 星級診斷資料
+    _starDebug: {
+        textStar,
+        colorStar,
+        finalStar: star,
+        conflict: starConflict,
 
-    // 顏色分析詳細資料
-    goldRatio: colorDebug?.goldRatio ?? null,
-    purpleRatio: colorDebug?.purpleRatio ?? null,
-    goldPixels: colorDebug?.goldPixels ?? 0,
-    purplePixels: colorDebug?.purplePixels ?? 0,
-    totalPixels: colorDebug?.totalPixels ?? 0,
-    colorY: colorDebug?.y0 ?? null,
-    colorHeight: colorDebug?.height ?? null
-}
+        // 顏色分析詳細資料
+        goldRatio: colorDebug
+            ? colorDebug.goldRatio
+            : null,
+
+        purpleRatio: colorDebug
+            ? colorDebug.purpleRatio
+            : null,
+
+        goldPixels: colorDebug
+            ? colorDebug.goldPixels
+            : 0,
+
+        purplePixels: colorDebug
+            ? colorDebug.purplePixels
+            : 0,
+
+        totalPixels: colorDebug
+            ? colorDebug.totalPixels
+            : 0,
+
+        colorY: colorDebug
+            ? colorDebug.y0
+            : null,
+
+        colorHeight: colorDebug
+            ? colorDebug.height
+            : null
+    }
 });
     }
     return records;
