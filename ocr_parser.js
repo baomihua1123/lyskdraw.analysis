@@ -471,7 +471,7 @@ if (/5星/.test(textNoSpace)) {
 }
 
 // ② 顏色判定
-// detectStarFromColor 現在回傳完整診斷物件
+// detectStarFromColor 回傳完整診斷物件
 const colorDebug = detectStarFromColor(
     colorCanvas,
     row.bbox,
@@ -482,11 +482,12 @@ const colorStar = colorDebug
     ? colorDebug.star
     : null;
 
-// ③ 目前仍維持「顏色優先」
-//    這次只是診斷，不改原本判定邏輯
-const star = colorStar ?? textStar ?? 3;
+// ③ 星級判定：文字優先，顏色備援
+// 文字成功辨識時，不讓背景、動畫或卡面顏色覆蓋文字結果。
+// 只有文字無法辨識星級時，才使用顏色判定。
+const star = textStar ?? colorStar ?? 3;
 
-// ④ 判斷 OCR 與顏色是否衝突
+// ④ 記錄文字與顏色是否出現不同結果
 const starConflict =
     textStar !== null &&
     colorStar !== null &&
