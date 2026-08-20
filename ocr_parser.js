@@ -197,34 +197,26 @@ async function handleOCR(event) {
             }
 
             // ── 加入星級判定衝突資訊 ──────────────────────
-            if (starConflicts.length > 0) {
+            // 只有使用者開啟「顯示星級判定診斷資訊」時才顯示
+const showOCRDebug = document.getElementById('showOCRDebug')?.checked ?? false;
 
-                resText +=
-                    `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
+if (showOCRDebug && starConflicts.length > 0) {
+    resText += `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
 
-                // 最多顯示 10 筆，避免通知過長
-                starConflicts
-                    .slice(0, 10)
-                    .forEach(r => {
+    starConflicts.forEach(r => {
+        resText += `\n第${r._ocrPage}張｜${r.name}`;
+        resText += `｜文字${r._starDebug.textStar ?? '無'}星`;
+        resText += `｜顏色${r._starDebug.colorStar ?? '無'}星`;
+        resText += `｜採用${r._starDebug.finalStar}星`;
 
-                        resText +=
-    `\n第${r._ocrPage}張｜${r.name}`;
+        if (r._starDebug.goldRatio !== null) {
+            resText += `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
+        }
 
-resText +=
-    `｜文字${r._starDebug.textStar}星`;
-
-resText +=
-    `｜顏色${r._starDebug.colorStar}星`;
-
-resText +=
-    `｜採用${r._starDebug.finalStar}星`;
-
-resText +=
-    `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
-
-resText +=
-    `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
-                    });
+        if (r._starDebug.purpleRatio !== null) {
+            resText += `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
+        }
+    });
 
                 if (starConflicts.length > 10) {
                     resText +=
