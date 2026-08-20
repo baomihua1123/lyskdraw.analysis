@@ -56,13 +56,7 @@ async function handleOCR(event) {
             records.forEach(record => {
                 record._ocrPage = i + 1;
             });
-
-            if (records.length < 5) {
-                warnings.push(
-                    `第 ${i + 1} 張僅讀取到 ${records.length} 筆`
-                );
-            }
-
+            //原本在這裡
             if (records.length > 0) {
 
                 // 找出本頁有真實時間戳記的紀錄，
