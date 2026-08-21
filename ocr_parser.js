@@ -56,18 +56,30 @@ async function handleOCR(event) {
             records.forEach(record => {
                 record._ocrPage = i + 1;
             });
-            //原本在這裡
             if (records.length > 0) {
 
-                // 找出本頁有真實時間戳記的紀錄，
-                // 作為頁面排序依據
-                const realTimes = records
-                        .filter(r => r._hasRealTime)
-                        .map(r => r.time);
-
+                // ── 同一張截圖內：依抽卡時間由新到舊排序 ──────────────
+                records.sort((a, b) => {
+                    // 兩筆都有真實時間 → 依時間排序
+                    if (a._hasRealTime && b._hasRealTime) {
+                        return b.time - a.time;
+                    }
+                    // 有真實時間的紀錄優先
+                    if (a._hasRealTime) return -1;
+                    if (b._hasRealTime) return 1;
+                        
+                    // 都沒有時間時，維持 OCR 原本順序
+                   return 0;
+                });
+                
+                // 找出本頁最新的一筆真實時間，
+                // 作為整張截圖的排序依據
+                const validTimeRecords =
+                    records.filter(r => r._hasRealTime);
+                
                 records._pageTime =
-                    realTimes.length > 0
-                        ? Math.max(...realTimes)
+                    validTimeRecords.length > 0
+                        ? Math.max(...validTimeRecords.map(r => r.time))
                         : 0;
 
                 pages.push(records);
@@ -82,13 +94,25 @@ async function handleOCR(event) {
             return;
         }
 
-        // ── 依頁面時間由新到舊排序 ────────────────────────
-        pages.sort(
-            (a, b) => b._pageTime - a._pageTime
-        );
+        // ── 多張截圖依最新時間由新到舊排序 ─────────────────
+        pages.sort((a, b) => {
+            return b._pageTime - a._pageTime;
+        });
 
         // 攤平成一維陣列
         const allRecords = pages.flat();
+        
+        // ── 最終保險：所有紀錄依實際抽卡時間由新到舊排序 ─────
+        allRecords.sort((a, b) => {
+            if (a._hasRealTime && b._hasRealTime) {
+                return b.time - a.time;
+            }
+            
+            if (a._hasRealTime) return -1;
+            if (b._hasRealTime) return 1;
+            
+            return 0;
+        });
 
         // ── 星級診斷統計 ───────────────────────────────────
         const starConflicts = allRecords.filter(
