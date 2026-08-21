@@ -82,8 +82,10 @@ function renderUI() {
         const evTime      = getEventDate(r.banner, r.main);
         r._evTime         = evTime;
         // 程式邏輯：這行最關鍵！排序依據優先看自訂時間(r.time)，再來是活動時間，最後才是建立ID
-        r._sortTime       = r.time || evTime || r.id; 
-        r._entryOrder     = r.id;
+        // 優先使用實際抽卡時間
+        // 沒有時間的舊資料才使用活動時間，最後才使用建立 ID
+        r._sortTime = r.time ? new Date(r.time).getTime() : (evTime || r.id);
+        r._entryOrder = r.id;
 
     });
 
