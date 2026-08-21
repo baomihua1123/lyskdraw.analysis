@@ -61,12 +61,13 @@ async function handleOCR(event) {
 
                 // 找出本頁有真實時間戳記的紀錄，
                 // 作為頁面排序依據
-                const validTimeRecord =
-                    records.find(r => r._hasRealTime);
+                const realTimes = records
+                        .filter(r => r._hasRealTime)
+                        .map(r => r.time);
 
                 records._pageTime =
-                    validTimeRecord
-                        ? validTimeRecord.time
+                    realTimes.length > 0
+                        ? Math.max(...realTimes)
                         : 0;
 
                 pages.push(records);
