@@ -214,10 +214,21 @@ window.updatePulledCardList = function () {
 };
 
 // ── 自動填入：OCR 辨識結果 ────────────────────────────────
-window.autoFillFromOCR = function (pulls, cardName, latestTime, pendingPulls, rawText = '', poolName = null) {
+window.autoFillFromOCR = function (
+    pulls, 
+    cardName, 
+    latestTime, 
+    pendingPulls, 
+    rawText = '', 
+    poolName = null
+) {
+    window.currentOCRTime = latestTime || null;
     window.currentPendingPulls = pendingPulls || 0;
+    
     document.getElementById('pulls').value = pulls;
-    if (!cardName || cardName === '未知' || cardName.includes('未知卡名')) return;
+    if (!cardName || cardName === '未知' || cardName.includes('未知卡名'))
+        return;
+    }
     document.getElementById('cardName').value = cardName;
 
     let foundLead    = findTrueLead(cardName);
