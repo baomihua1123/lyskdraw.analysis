@@ -193,29 +193,29 @@ async function handleOCR(event) {
 
             // ── 加入星級判定衝突資訊 ──────────────────────
             // 只有使用者開啟「顯示星級判定診斷資訊」時才顯示
-const showOCRDebug = document.getElementById('showOCRDebug')?.checked ?? false;
+            const showOCRDebug = document.getElementById('showOCRDebug')?.checked ?? false;
 
-if (showOCRDebug && starConflicts.length > 0) {
-    resText += `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
+            if (showOCRDebug && starConflicts.length > 0) {
+                resText += `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
 
-    starConflicts.forEach(r => {
-        resText += `\n第${r._ocrPage}張｜${r.name}`;
-        resText += `｜文字${r._starDebug.textStar ?? '無'}星`;
-        resText += `｜顏色${r._starDebug.colorStar ?? '無'}星`;
-        resText += `｜採用${r._starDebug.finalStar}星`;
+            starConflicts.forEach(r => {
+                resText += `\n第${r._ocrPage}張｜${r.name}`;
+                resText += `｜文字${r._starDebug.textStar ?? '無'}星`;
+                resText += `｜顏色${r._starDebug.colorStar ?? '無'}星`;
+                resText += `｜採用${r._starDebug.finalStar}星`;
 
-        if (r._starDebug.goldRatio !== null) {
-            resText += `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
-        }
+            if (r._starDebug.goldRatio !== null) {
+                resText += `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
+            }
 
-        if (r._starDebug.purpleRatio !== null) {
-            resText += `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
-        }
-    });
+            if (r._starDebug.purpleRatio !== null) {
+                resText += `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
+            }
+        });
 
-                if (starConflicts.length > 10) {
-                    resText +=
-                        `\n……其餘 ${starConflicts.length - 10} 筆請查看 Console`;
+            if (starConflicts.length > 10) {
+                resText +=
+                    `\n……其餘 ${starConflicts.length - 10} 筆請查看 Console`;
                 }
             }
 
@@ -235,34 +235,28 @@ if (showOCRDebug && starConflicts.length > 0) {
 
             // 即使五星不足，也要顯示星級衝突
             if (starConflicts.length > 0) {
-
                 warningText +=
                     `\n\n⚠️ 發現 ${starConflicts.length} 筆星級判定差異：`;
 
                 starConflicts
                     .slice(0, 10)
                     .forEach(r => {
-
                         warningText +=
                             `\n第${r._ocrPage}張｜${r.name}`;
-
                         warningText +=
                             `｜文字${r._starDebug.textStar}星`;
-
                         warningText +=
                             `｜顏色${r._starDebug.colorStar}星`;
-
                         warningText +=
                             `｜採用${r._starDebug.finalStar}星`;
                     });
             }
 
-            statusEl.innerText = warningText;
-            statusEl.style.color = '#facc15';
+                statusEl.innerText = warningText;
+                statusEl.style.color = '#facc15';
         }
 
-    } catch (err) {
-
+            } catch (err) {
         statusEl.innerText =
             '❌ 失敗：' +
             (err.message || '未知');
@@ -276,37 +270,37 @@ if (showOCRDebug && starConflicts.length > 0) {
     }
 }
 
-// ── extractRecordsFromImage ───────────────────────────────
-async function extractRecordsFromImage(file) {
-    const colorCanvas = await fileToCanvas(file);
-    const { width, height } = colorCanvas;
+            // ── extractRecordsFromImage ───────────────────────────────
+            async function extractRecordsFromImage(file) {
+                const colorCanvas = await fileToCanvas(file);
+                const { width, height } = colorCanvas;
 
-    // 裁切頂端 15%（通常是 UI 標題欄），降低 OCR 噪音
-    const cropTop = Math.floor(height * 0.15);
-    const ocrCanvas = document.createElement('canvas');
-    ocrCanvas.width  = width;
-    ocrCanvas.height = height - cropTop;
-    const ctx = ocrCanvas.getContext('2d');
-    // 灰階 + 反色 + 高對比，讓深色背景上的白字更易辨識
-    ctx.filter = 'grayscale(100%) invert(100%) contrast(180%) brightness(110%)';
-    ctx.drawImage(colorCanvas, 0, -cropTop);
+            // 裁切頂端 15%（通常是 UI 標題欄），降低 OCR 噪音
+            const cropTop = Math.floor(height * 0.15);
+                const ocrCanvas = document.createElement('canvas');
+                ocrCanvas.width  = width;
+                ocrCanvas.height = height - cropTop;
+                const ctx = ocrCanvas.getContext('2d');
+            // 灰階 + 反色 + 高對比，讓深色背景上的白字更易辨識
+            ctx.filter = 'grayscale(100%) invert(100%) contrast(180%) brightness(110%)';
+                ctx.drawImage(colorCanvas, 0, -cropTop);
 
-    const result = await Tesseract.recognize(ocrCanvas, 'chi_tra+eng');
+            const result = await Tesseract.recognize(ocrCanvas, 'chi_tra+eng');
 
-    // 將 Tesseract 的行結果，依 Y 軸重疊度合併成視覺上的「同一行」
-    const rows = [];
-    for (const line of result.data.lines) {
-        const text = line.text.trim();
-        if (text.length < 2) continue;
+            // 將 Tesseract 的行結果，依 Y 軸重疊度合併成視覺上的「同一行」
+            const rows = [];
+                for (const line of result.data.lines) {
+                    const text = line.text.trim();
+                    if (text.length < 2) continue;
 
-        // 找已有 row 中與此行 Y 軸重疊超過 30% 的（視為同一行）
-        let foundRow = rows.find(r => {
-            const overlap   = Math.max(0, Math.min(r.bbox.y1, line.bbox.y1) - Math.max(r.bbox.y0, line.bbox.y0));
-            const minHeight = Math.min(r.bbox.y1 - r.bbox.y0, line.bbox.y1 - line.bbox.y0);
-            return overlap > minHeight * 0.3;
+            // 找已有 row 中與此行 Y 軸重疊超過 30% 的（視為同一行）
+            let foundRow = rows.find(r => {
+                const overlap   = Math.max(0, Math.min(r.bbox.y1, line.bbox.y1) - Math.max(r.bbox.y0, line.bbox.y0));
+                const minHeight = Math.min(r.bbox.y1 - r.bbox.y0, line.bbox.y1 - line.bbox.y0);
+                return overlap > minHeight * 0.3;
         });
 
-        if (foundRow) {
+            if (foundRow) {
             // 依 X 座標決定文字左右拼接順序
             foundRow.text = line.bbox.x0 < foundRow.bbox.x0
                 ? text + ' ' + foundRow.text
@@ -322,43 +316,43 @@ async function extractRecordsFromImage(file) {
             rows.push({ text, yCenter, bbox: { ...line.bbox } });
         }
     }
-    // 依垂直中心點由上到下排序
-    rows.sort((a, b) => a.yCenter - b.yCenter);
+            // 依垂直中心點由上到下排序
+            rows.sort((a, b) => a.yCenter - b.yCenter);
 
-    return parseOCRLines(rows, colorCanvas, cropTop);
+            return parseOCRLines(rows, colorCanvas, cropTop);
 }
 
-// ── detectStarFromColor ───────────────────────────────────
-//    分析指定行的像素顏色，判斷星級：
-//    金色（橘紅主色）→ 5星
-//    藍紫色 → 4星
-//    其餘 → 3星
-//
-//    ⚠️ 診斷版：保留原本判定邏輯，不直接修改結果。
-//    目的只是讓 parseOCRLines 同時取得顏色判定結果，
-//    再與 OCR 文字判定結果進行比較。
+        // ── detectStarFromColor ───────────────────────────────────
+        //    分析指定行的像素顏色，判斷星級：
+        //    金色（橘紅主色）→ 5星
+        //    藍紫色 → 4星
+        //    其餘 → 3星
+        //
+        //    ⚠️ 診斷版：保留原本判定邏輯，不直接修改結果。
+        //    目的只是讓 parseOCRLines 同時取得顏色判定結果，
+        //    再與 OCR 文字判定結果進行比較。
 
-function detectStarFromColor(colorCanvas, bbox, cropTop) {
-    const y0 = Math.max(0, bbox.y0 + cropTop);
-    const h  = bbox.y1 - bbox.y0;
+        function detectStarFromColor(colorCanvas, bbox, cropTop) {
+            const y0 = Math.max(0, bbox.y0 + cropTop);
+            const h  = bbox.y1 - bbox.y0;
 
-    if (h <= 0) return null;
+        if (h <= 0) return null;
 
-    const ctx = colorCanvas.getContext('2d');
-    const data = ctx.getImageData(
-        0,
-        y0,
-        colorCanvas.width,
-        h
-    ).data;
+        const ctx = colorCanvas.getContext('2d');
+        const data = ctx.getImageData(
+            0,
+            y0,
+            colorCanvas.width,
+            h
+        ).data;
 
-    let gCount = 0;
-    let pCount = 0;
+        let gCount = 0;
+        let pCount = 0;
 
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
 
         // 金色（目前 5 星判定條件）
         if (
@@ -444,41 +438,40 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
         //    ⚠️ 目前仍維持「顏色優先」的原本邏輯。
         //    此階段只用來找出兩種判定是否發生衝突。
 
-// ── 星級判定與診斷 ────────────────────────────────────────
+        // ── 星級判定與診斷 ────────────────────────────────────────
 
-// ① OCR 文字判定
-let textStar = null;
+        // ① OCR 文字判定
+        let textStar = null;
+        if (/5星/.test(textNoSpace)) {
+            textStar = 5;
+        } else if (/4星/.test(textNoSpace)) {
+            textStar = 4;
+        } else if (/3星/.test(textNoSpace)) {
+            textStar = 3;
+        }
 
-if (/5星/.test(textNoSpace)) {
-    textStar = 5;
-} else if (/4星/.test(textNoSpace)) {
-    textStar = 4;
-} else if (/3星/.test(textNoSpace)) {
-    textStar = 3;
-}
+        // ② 顏色判定
+        // detectStarFromColor 回傳完整診斷物件
+        const colorDebug = detectStarFromColor(
+            colorCanvas,
+            row.bbox,
+            cropTop
+        );
 
-// ② 顏色判定
-// detectStarFromColor 回傳完整診斷物件
-const colorDebug = detectStarFromColor(
-    colorCanvas,
-    row.bbox,
-    cropTop
-);
+        const colorStar = colorDebug
+            ? colorDebug.star
+            : null;
 
-const colorStar = colorDebug
-    ? colorDebug.star
-    : null;
+        // ③ 星級判定：文字優先，顏色備援
+        // 文字成功辨識時，不讓背景、動畫或卡面顏色覆蓋文字結果。
+        // 只有文字無法辨識星級時，才使用顏色判定。
+        const star = textStar ?? colorStar ?? 3;
 
-// ③ 星級判定：文字優先，顏色備援
-// 文字成功辨識時，不讓背景、動畫或卡面顏色覆蓋文字結果。
-// 只有文字無法辨識星級時，才使用顏色判定。
-const star = textStar ?? colorStar ?? 3;
-
-// ④ 記錄文字與顏色是否出現不同結果
-const starConflict =
-    textStar !== null &&
-    colorStar !== null &&
-    textStar !== colorStar;
+        // ④ 記錄文字與顏色是否出現不同結果
+        const starConflict =
+            textStar !== null &&
+            colorStar !== null &&
+            textStar !== colorStar;
 
         // ── 卡名比對（三段式，由精確到模糊）─────────────────
         let cardName = '未知';
@@ -532,18 +525,18 @@ const starConflict =
         // ── 保存 OCR 診斷資訊 ─────────────────────────────────────
         //    不影響原本資料格式，只額外增加 _starDebug。
         records.push({
-    star,
-    time,
-    name: cardName,
-    raw: rawText,
-    _hasRealTime: hasRealTime,
+            star,
+            time,
+            name: cardName,
+            raw: rawText,
+            _hasRealTime: hasRealTime,
 
-    // 星級診斷資料
-    _starDebug: {
-        textStar,
-        colorStar,
-        finalStar: star,
-        conflict: starConflict,
+        // 星級診斷資料
+        _starDebug: {
+            textStar,
+            colorStar,
+            finalStar: star,
+            conflict: starConflict,
 
         // 顏色分析詳細資料
         goldRatio: colorDebug
@@ -573,29 +566,29 @@ const starConflict =
         colorHeight: colorDebug
             ? colorDebug.height
             : null
-    }
-});
+        }
+        });
     }
     return records;
 }
 
-// ── fileToCanvas ──────────────────────────────────────────
-//    將圖片檔案轉為 Canvas 供後續分析使用。
-//    【Bug 修正】原版建立了 Blob URL 後從未釋放，每處理一張
-//    圖片就洩漏一筆記憶體。現在在 onload 完成後立即呼叫
-//    URL.revokeObjectURL() 釋放資源。
-function fileToCanvas(file) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            // 圖片繪製完成後立即釋放 Blob URL，防止記憶體洩漏
-            URL.revokeObjectURL(img.src);
-            const c = document.createElement('canvas');
-            c.width  = img.width;
-            c.height = img.height;
-            c.getContext('2d').drawImage(img, 0, 0);
-            resolve(c);
-        };
+        // ── fileToCanvas ──────────────────────────────────────────
+        //    將圖片檔案轉為 Canvas 供後續分析使用。
+        //    【Bug 修正】原版建立了 Blob URL 後從未釋放，每處理一張
+        //    圖片就洩漏一筆記憶體。現在在 onload 完成後立即呼叫
+        //    URL.revokeObjectURL() 釋放資源。
+        function fileToCanvas(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                // 圖片繪製完成後立即釋放 Blob URL，防止記憶體洩漏
+                URL.revokeObjectURL(img.src);
+                    const c = document.createElement('canvas');
+                    c.width  = img.width;
+                    c.height = img.height;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    resolve(c);
+                };
         img.onerror = () => {
             URL.revokeObjectURL(img.src); // 失敗時也要釋放
             reject(new Error('圖片載入失敗'));
@@ -604,17 +597,16 @@ function fileToCanvas(file) {
     });
 }
 
-// ── countPulls ────────────────────────────────────────────
-//    從所有 OCR 紀錄中找出五星位置，計算每次出金的間距（抽數），
-//    並回傳最後一次出金後的已墊抽數（pendingPulls）。
-function countPulls(records) {
-    // 取出所有五星紀錄並保留其在陣列中的原始索引
-    const pos          = records.map((r, i) => ({ ...r, i })).filter(r => r.star === 5);
-    // 出金後到當前頁面末尾的距離即為已墊抽數
-    const pendingPulls = pos.length > 0 ? pos[0].i : records.length;
-    if (pos.length < 2) return { pullEvents: [], fiveStarCount: pos.length, pendingPulls, pos };
-
-    return {
+        // ── countPulls ────────────────────────────────────────────
+        //    從所有 OCR 紀錄中找出五星位置，計算每次出金的間距（抽數），
+        //    並回傳最後一次出金後的已墊抽數（pendingPulls）。
+        function countPulls(records) {
+        // 取出所有五星紀錄並保留其在陣列中的原始索引
+        const pos          = records.map((r, i) => ({ ...r, i })).filter(r => r.star === 5);
+         // 出金後到當前頁面末尾的距離即為已墊抽數
+        const pendingPulls = pos.length > 0 ? pos[0].i : records.length;
+        if (pos.length < 2) return { pullEvents: [], fiveStarCount: pos.length, pendingPulls, pos };
+            return {
         // 每兩個相鄰五星之間的距離即為該次抽卡所花抽數
         pullEvents: pos.slice(0, -1).map((c, i) => ({
             name:     c.name,
