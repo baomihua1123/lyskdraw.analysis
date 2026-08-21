@@ -85,9 +85,6 @@ function renderUI() {
         r._sortTime       = r.time || evTime || r.id; 
         r._entryOrder     = r.id;
 
-        if      (r.res === 'target') r.luck = judgeT(r.total);
-        else if (r.main === '常駐')  r.luck = judgeS(r.total);
-        else                         r.luck = judgeS(r.pulls);
     });
 
     if (dbChanged) setDB(db);
@@ -152,7 +149,6 @@ function renderUI() {
             ? ''
             : `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}]`;
 
-        const isBlack    = r.pulls > 55 && r.pulls <= 62;
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
 
         return `
@@ -162,7 +158,7 @@ function renderUI() {
              ondragleave="handleDragLeave(event)" 
              ondrop="handleDrop(event, ${r.id})"
              ondragend="handleDragEnd(event)">
-            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
+            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%;"></div>
             <div class="h-content">
                 <div class="h-left">
                     <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''}${subTagHtml}<span class="tag" style="background-color: ${statusColor};">${cardTypeStr}</span></div>
@@ -174,7 +170,6 @@ function renderUI() {
                 </div>
                 <div class="h-right">
                     <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
-                    <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}" style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">${r.luck.t}</div>
                     <button class="del-btn-icon" onclick="deleteRec(${r.id})" title="刪除紀錄">🗑️</button>
                     <div class="drag-handle" title="按住拖曳來排序">☰</div>
                 </div>
