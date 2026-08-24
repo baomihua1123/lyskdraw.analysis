@@ -21,25 +21,11 @@ const cardToLeadMap = (() => {
 })();
 
 function findTrueLead(cardName) {
-    return cardToLeadMap.get(cardName) ?? null;
-    if (!cardName || cardName === '未知') return null;
+    if (!cardName || cardName === '未知') {
+        return null;
+    }
 
-    // 先從常駐卡資料尋找
-    for (const [lead, cards] of Object.entries(standardCards)) {
-        if (cards.includes(cardName)) {
-            return lead;
-        }
-    }
-    
-    // 再從活動卡池資料尋找
-    for (const event of eventCards) {
-        for (const [lead, cards] of Object.entries(event.cards)) {
-            if (cards.includes(cardName)) {
-                return lead;
-            }
-        }
-    }
-    return null;
+    return cardToLeadMap.get(cardName) ?? null;
 }
 
 // ── 共用 Helper：依 poolType 設定 subPool 選項 ─────────────
@@ -244,7 +230,7 @@ window.autoFillFromOCR = function (
     window.currentPendingPulls = pendingPulls || 0;
     
     document.getElementById('pulls').value = pulls;
-    if (!cardName || cardName === '未知' || cardName.includes('未知卡名'))
+    if (!cardName || cardName === '未知' || cardName.includes('未知卡名')){
         return;
     }
     document.getElementById('cardName').value = cardName;
