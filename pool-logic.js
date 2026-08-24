@@ -21,7 +21,24 @@ const cardToLeadMap = (() => {
 })();
 
 function findTrueLead(cardName) {
-    return cardToLeadMap.get(cardName) ?? null;
+    if (!cardName || cardName === '未知') return null;
+
+    // 先從常駐卡資料尋找
+    for (const [lead, cards] of Object.entries(standardCards)) {
+        if (cards.includes(cardName)) {
+            return lead;
+        }
+    }
+    
+    // 再從活動卡池資料尋找
+    for (const event of eventCards) {
+        for (const [lead, cards] of Object.entries(event.cards)) {
+            if (cards.includes(cardName)) {
+                return lead;
+            }
+        }
+    }
+    return null;
 }
 
 // ── 共用 Helper：依 poolType 設定 subPool 選項 ─────────────
