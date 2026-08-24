@@ -21,6 +21,7 @@ const cardToLeadMap = (() => {
 })();
 
 function findTrueLead(cardName) {
+    return cardToLeadMap.get(cardName) ?? null;
     if (!cardName || cardName === '未知') return null;
 
     // 先從常駐卡資料尋找
