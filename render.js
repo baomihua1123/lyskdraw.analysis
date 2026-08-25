@@ -251,7 +251,10 @@ function renderUI() {
         const dateStr = r.main === '常駐' && !r.time
             ? ''
             : `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}]`;
-
+        
+        // ⚠️ isBlack 必須在這裡宣告
+        const isBlack = r.pulls > 55 && r.pulls <= 62;
+        
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
 
         return `
@@ -261,13 +264,13 @@ function renderUI() {
              ondragleave="handleDragLeave(event)" 
              ondrop="handleDrop(event, ${r.id})"
              ondragend="handleDragEnd(event)">
-            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%;"></div>
+            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
             <div class="h-content">
                 <div class="h-left">
-                    <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''}${subTagHtml}<span class="tag" style="background-color: ${statusColor};">${cardTypeStr}</span></div>
+                    <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
                     <span class="h-title">
-                        <span style="font-size: 15px; font-weight: bold; color: var(--text-main);">${r.card || '未知'}</span>
-                        <span style="font-size: 12px; font-weight: normal;"> | ${r.banner}</span>
+                        <span style="font-size: 15px;font-weight: bold;color: var(--text-main);">${r.card || '未知'}</span>
+                        <span style="font-size: 12px;font-weight: normal;"> | ${r.banner}</span>
                         <span class="h-date">${dateStr}</span>
                     </span>
                 </div>
