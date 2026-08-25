@@ -252,9 +252,6 @@ function renderUI() {
             ? ''
             : `[${d.getFullYear().toString().slice(2)}/${(d.getMonth() + 1).toString().padStart(2, '0')}]`;
         
-        // ⚠️ isBlack 必須在這裡宣告
-        const isBlack = r.pulls > 55 && r.pulls <= 62;
-        
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
 
         return `
@@ -264,7 +261,7 @@ function renderUI() {
              ondragleave="handleDragLeave(event)" 
              ondrop="handleDrop(event, ${r.id})"
              ondragend="handleDragEnd(event)">
-            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%; background-color: ${r.luck.c};"></div>
+            <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%;"></div>
             <div class="h-content">
                 <div class="h-left">
                     <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
@@ -278,25 +275,18 @@ function renderUI() {
                 <div class="h-pulls">
                     <span class="pull-num">${r.pulls}</span> 抽
                 </div>
-
-                <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}"
-                     style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">
-                     ${r.luck.t}
-                </div>
-
+                
                     <button
                      class="edit-time-btn"
                     onclick="editRecordTime(${r.id})"
-                    title="編輯抽卡時間"
-                    >
+                    title="編輯抽卡時間">
                     🕒
                     </button>
 
                     <button
                     class="del-btn-icon"
                     onclick="deleteRec(${r.id})"
-                    title="刪除紀錄"
-                    >
+                    title="刪除紀錄">
                     🗑️
                     </button>
 
