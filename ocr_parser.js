@@ -41,21 +41,14 @@ async function handleOCR(event) {
     statusEl.innerText = `⏳ 辨識中... (0/${files.length})`;
     statusEl.style.color = '#c084fc';
 
-    try {
-        let pages = [];
-        let warnings = [];
-
-        for (let i = 0; i < files.length; i++) {
-            statusEl.innerText =
+    try {let pages = [];let warnings = [];
+        for (let i = 0; i < files.length; i++) {statusEl.innerText =
                 `⏳ 辨識中... (${i + 1}/${files.length})`;
 
-            const records =
-                await extractRecordsFromImage(files[i]);
+            const records = await extractRecordsFromImage(files[i]);
 
             // 記錄這些 OCR 紀錄來自第幾張圖片
-            records.forEach(record => {
-                record._ocrPage = i + 1;
-            });
+            records.forEach(record => {record._ocrPage = i + 1;});
             if (records.length > 0) {
 
                 // ── 同一張截圖內：依抽卡時間由新到舊排序 ──────────────
@@ -81,7 +74,6 @@ async function handleOCR(event) {
                     validTimeRecords.length > 0
                         ? Math.max(...validTimeRecords.map(r => r.time))
                         : 0;
-
                 pages.push(records);
             }
         }
@@ -89,7 +81,6 @@ async function handleOCR(event) {
         if (pages.length === 0) {
             statusEl.innerText =
                 '⚠️ 未能辨識，請確認截圖清晰';
-
             statusEl.style.color = '#facc15';
             return;
         }
@@ -106,19 +97,15 @@ async function handleOCR(event) {
         allRecords.sort((a, b) => {
             if (a._hasRealTime && b._hasRealTime) {
                 return b.time - a.time;
-            }
-            
+            }            
             if (a._hasRealTime) return -1;
             if (b._hasRealTime) return 1;
-            
             return 0;
         });
 
         // ── 星級診斷統計 ───────────────────────────────────
-        const starConflicts = allRecords.filter(
-            r => r._starDebug?.conflict
-        );
-
+        const starConflicts = allRecords.filter(r => r._starDebug?.conflict);
+         
         // 將診斷結果寫入 console，
         // 方便之後需要進一步分析時查看
         if (starConflicts.length > 0) {
@@ -131,40 +118,27 @@ async function handleOCR(event) {
                     圖片: r._ocrPage,
                     卡名: r.name,
                     原始文字: r.raw,
-                    OCR文字星級:
-                        r._starDebug.textStar,
-                    顏色判定星級:
-                        r._starDebug.colorStar,
-                    最終判定:
-                        r._starDebug.finalStar
+                    OCR文字星級: r._starDebug.textStar,
+                    顏色判定星級: r._starDebug.colorStar,
+                    最終判定: r._starDebug.finalStar
                 }))
             );
-
             console.groupEnd();
         }
 
         const result = countPulls(allRecords);
-
         if (result.pullEvents.length > 0) {
 
             // 保留舊資料優先邏輯：
             // 多張五星時從最舊的一筆開始補登
             const targetGold =
-                result.pullEvents[
-                    result.pullEvents.length - 1
-                ];
-
-            const pendingPulls =
-                result.pendingPulls;
-
+                result.pullEvents[result.pullEvents.length - 1];
+            const pendingPulls = result.pendingPulls;
             let finalPoolName = null;
 
             // 輔助：判斷卡名是否為常駐池卡片
             const isStandard = (name) => {
-                if (
-                    !name ||
-                    typeof standardCards === 'undefined'
-                ) {
+                if (!name || typeof standardCards === 'undefined' ) {
                     return false;
                 }
 
@@ -174,16 +148,11 @@ async function handleOCR(event) {
 
             // 連續兩次五星皆為常駐卡
             // → 判定為常駐池
-            if (
-                isStandard(targetGold.name) &&
-                isStandard(targetGold.prevName)
-            ) {
+            if (isStandard(targetGold.name) && isStandard(targetGold.prevName)) {
                 finalPoolName = '常駐';
             }
 
-            if (
-                typeof window.autoFillFromOCR === 'function'
-            ) {
+            if (typeof window.autoFillFromOCR === 'function') {
                 window.autoFillFromOCR(
                     targetGold.pulls,
                     targetGold.name,
@@ -196,11 +165,7 @@ async function handleOCR(event) {
 
             // ── 建立原本的結果通知 ────────────────────────
             let resText = `✅ 辨識完成！`;
-
-            if (finalPoolName) {
-                resText += `（${finalPoolName}）`;
-            }
-
+            if (finalPoolName) {resText += `（${finalPoolName}）`;}
             resText += `\n\n`;
 
             [...result.pullEvents]
@@ -228,34 +193,19 @@ async function handleOCR(event) {
                 resText += `｜顏色${r._starDebug.colorStar ?? '無'}星`;
                 resText += `｜採用${r._starDebug.finalStar}星`;
 
-            if (r._starDebug.goldRatio !== null) {
-                resText += `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;
-            }
-
-            if (r._starDebug.purpleRatio !== null) {
-                resText += `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;
-            }
+            if (r._starDebug.goldRatio !== null) {resText += `｜金${(r._starDebug.goldRatio * 100).toFixed(3)}%`;}
+            if (r._starDebug.purpleRatio !== null) {resText += `｜紫${(r._starDebug.purpleRatio * 100).toFixed(3)}%`;}
         });
 
-            if (starConflicts.length > 10) {
-                resText +=
-                    `\n……其餘 ${starConflicts.length - 10} 筆請查看 Console`;
-                }
+            if (starConflicts.length > 10) {resText += `\n……其餘 ${starConflicts.length - 10} 筆請查看 Console`;}
             }
 
-            if (warnings.length > 0) {
-                resText +=
-                    `\n(⚠️ ${warnings.join('；')})`;
-            }
+            if (warnings.length > 0) {resText += `\n(⚠️ ${warnings.join('；')})`;}
 
             statusEl.innerText = resText;
             statusEl.style.color = '#4ade80';
-
         } else {
-
-            let warningText =
-                `⚠️ 只找到 ${result.fiveStarCount} 個5星 ` +
-                `(需至少2個才能計算，請確認截圖範圍)`;
+            let warningText = `⚠️ 只找到 ${result.fiveStarCount} 個5星 ` +  `(需至少2個才能計算，請確認截圖範圍)`;
 
             // 即使五星不足，也要顯示星級衝突
             if (starConflicts.length > 0) {
@@ -265,32 +215,20 @@ async function handleOCR(event) {
                 starConflicts
                     .slice(0, 10)
                     .forEach(r => {
-                        warningText +=
-                            `\n第${r._ocrPage}張｜${r.name}`;
-                        warningText +=
-                            `｜文字${r._starDebug.textStar}星`;
-                        warningText +=
-                            `｜顏色${r._starDebug.colorStar}星`;
-                        warningText +=
-                            `｜採用${r._starDebug.finalStar}星`;
+                        warningText += `\n第${r._ocrPage}張｜${r.name}`;
+                        warningText += `｜文字${r._starDebug.textStar}星`;
+                        warningText += `｜顏色${r._starDebug.colorStar}星`;
+                        warningText += `｜採用${r._starDebug.finalStar}星`;
                     });
             }
-
                 statusEl.innerText = warningText;
                 statusEl.style.color = '#facc15';
         }
-
             } catch (err) {
-        statusEl.innerText =
-            '❌ 失敗：' +
-            (err.message || '未知');
-
+        statusEl.innerText = '❌ 失敗：' + (err.message || '未知');
         statusEl.style.color = '#ef4444';
 
-        console.error(
-            'OCR Error:',
-            err
-        );
+        console.error('OCR Error:', err );
     }
 }
 
@@ -363,12 +301,7 @@ async function handleOCR(event) {
         if (h <= 0) return null;
 
         const ctx = colorCanvas.getContext('2d');
-        const data = ctx.getImageData(
-            0,
-            y0,
-            colorCanvas.width,
-            h
-        ).data;
+        const data = ctx.getImageData(0,y0,colorCanvas.width,h).data;
 
         let gCount = 0;
         let pCount = 0;
@@ -379,68 +312,54 @@ async function handleOCR(event) {
             const b = data[i + 2];
 
         // 金色（目前 5 星判定條件）
-        if (
-            r > 140 &&
+        if (r > 140 &&
             r > g &&
             g > b &&
-            (r - b) > 35
-        ) {
-            gCount++;
-        }
+            (r - b) > 35) {gCount++;}
 
         // 藍紫色（目前 4 星判定條件）
-        else if (
-            b > r &&
-            b > g &&
-            (b - r) > 25 &&
-            b > 120
-        ) {
-            pCount++;
+        else if (b > r &&
+                 b > g &&
+                 (b - r) > 25 &&
+                 b > 120) {pCount++;}
         }
-    }
 
-    const totalPixels = data.length / 4;
+        const totalPixels = data.length / 4;
+            if (totalPixels <= 0) return null;
+            
+            const goldRatio = gCount / totalPixels;
+            const purpleRatio = pCount / totalPixels;
 
-    if (totalPixels <= 0) return null;
+            let star;
+            if (goldRatio > 0.003) {star = 5;} 
+            else if (purpleRatio > 0.003) {star = 4;} 
+            else {star = 3;}
+        // 回傳完整診斷資訊
+        return {
+            star,
+            goldRatio,
+            purpleRatio,
+            goldPixels: gCount,
+            purplePixels: pCount,
+            totalPixels,
+            y0,
+            height: h
+            };
+        }
 
-    const goldRatio = gCount / totalPixels;
-    const purpleRatio = pCount / totalPixels;
-
-    let star;
-    if (goldRatio > 0.003) {
-        star = 5;
-    } else if (purpleRatio > 0.003) {
-        star = 4;
-    } else {
-        star = 3;
-    }
-    // 回傳完整診斷資訊
-    return {
-        star,
-        goldRatio,
-        purpleRatio,
-        goldPixels: gCount,
-        purplePixels: pCount,
-        totalPixels,
-        y0,
-        height: h
-    };
-}
-
-// ── parseOCRLines ─────────────────────────────────────────
-//    使用模組頂端的 KNOWN_CARDS 快取，避免每次重建。
-//    使用模組頂端的 LEADS 常數，避免硬寫男主名稱三次。
-function parseOCRLines(rows, colorCanvas, cropTop) {
-    const records = [];
-    const known   = KNOWN_CARDS; // 直接引用快取，不再重建
-    let lastTime  = Date.now();
-
-    for (const row of rows) {
-        const rawText = row.text.trim();
+        // ── parseOCRLines ─────────────────────────────────────────
+        //    使用模組頂端的 KNOWN_CARDS 快取，避免每次重建。
+        //    使用模組頂端的 LEADS 常數，避免硬寫男主名稱三次。
+        function parseOCRLines(rows, colorCanvas, cropTop) {
+            const records = [];
+            const known   = KNOWN_CARDS; // 直接引用快取，不再重建
+            let lastTime  = Date.now();
+            
+        for (const row of rows) {
+            const rawText = row.text.trim();
 
         // 跳過太短或明顯是 UI 標題文字的行
-        if (
-            rawText.length < 4 ||
+        if (rawText.length < 4 ||
             /DEEPSPACE|LIMITED|掉落|預覽|許願|記錄|伺服器|延遲|沒有資料|稍後|再來|UID|uid|類型|名稱|時間/i.test(rawText)
         ) continue;
 
@@ -466,13 +385,9 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
 
         // ① OCR 文字判定
         let textStar = null;
-        if (/5星/.test(textNoSpace)) {
-            textStar = 5;
-        } else if (/4星/.test(textNoSpace)) {
-            textStar = 4;
-        } else if (/3星/.test(textNoSpace)) {
-            textStar = 3;
-        }
+        if (/5星/.test(textNoSpace)) {textStar = 5;} 
+        else if (/4星/.test(textNoSpace)) {textStar = 4;} 
+        else if (/3星/.test(textNoSpace)) {textStar = 3;}
 
         // ② 顏色判定
         // detectStarFromColor 回傳完整診斷物件
@@ -535,17 +450,66 @@ function parseOCRLines(rows, colorCanvas, cropTop) {
         }
 
         // ── 時間戳記解析 ─────────────────────────────────────
-        const tM = rawText.match(/(202\d)?[-/.]?\d{1,2}[-/.]\d{1,2}\s+\d{1,2}[:;.]\d{1,2}[:;.]\d{1,2}/);
-        let time = lastTime; let hasRealTime = false;
-        if (tM) {
-            let timeStr = tM[0];
-            if (!timeStr.startsWith('202')) timeStr = new Date().getFullYear() + '-' + timeStr.replace(/^[-/.]/, '');
-            const parsed = new Date(
-                timeStr.replace(/[-/.]/g, '-').replace(/[:;.]/g, ':').replace(/\s+/, 'T')
-            ).getTime();
-            if (!isNaN(parsed)) { time = parsed; lastTime = parsed; hasRealTime = true; }
-        }
+        // OCR 的「許願時間」可能與卡名不在完全相同的一行，
+        // 因此除了目前 row，也會向附近 OCR 行尋找最近的時間。
+        const timePattern =  /(?:20\d{2}[-/.])?\d{1,2}[-/.]\d{1,2}\s+\d{1,2}[:;.]\d{1,2}[:;.]\d{1,2}/;
+        let time = null;
+        let hasRealTime = false;
 
+        // ① 先找目前這一行
+        let timeMatch = rawText.match(timePattern);
+
+        // ② 同一行沒有時間時，找前後附近的 OCR 行
+        if (!timeMatch) {
+            const rowIndex = rows.indexOf(row);
+
+            // 優先找下面幾行，再找上面幾行
+            const nearbyIndexes = [
+                rowIndex + 1,
+                rowIndex + 2,
+                rowIndex - 1,
+                rowIndex - 2];
+
+            for (const index of nearbyIndexes) {
+                if (index < 0 || index >= rows.length) continue;
+
+                const nearbyText = rows[index].text.trim();
+                const match = nearbyText.match(timePattern);
+
+                if (match) {
+                    timeMatch = match;
+                    break;
+                }
+            }
+        }
+        // ③ 成功找到時間後轉成 timestamp
+        if (timeMatch) {
+            let timeStr = timeMatch[0];
+
+            // OCR 沒有辨識年份時，自動補今年
+            if (!/^20\d{2}/.test(timeStr)) {
+                timeStr =
+                    new Date().getFullYear() +
+                    '-' +
+                    timeStr.replace(/^[-/.]/, '');
+        }
+        const normalized = timeStr
+            .replace(/[/.]/g, '-')
+            .replace(/[;.]/g, ':')
+            .replace(/\s+/, 'T');
+        const parsed = new Date(normalized).getTime();
+
+        if (!isNaN(parsed)) {
+            time = parsed;
+            hasRealTime = true;
+            lastTime = parsed;
+        }
+        }
+        // ④ 找不到時間時，不再假裝是目前時間
+       // 改用上一筆成功辨識的時間，但明確標示不是實際辨識時間
+            if (time === null) {
+                time = lastTime;
+            }
         // ── 保存 OCR 診斷資訊 ─────────────────────────────────────
         //    不影響原本資料格式，只額外增加 _starDebug。
         records.push({
