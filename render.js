@@ -272,10 +272,35 @@ function renderUI() {
                     </span>
                 </div>
                 <div class="h-right">
-                    <div class="h-pulls"><span class="pull-num">${r.pulls}</span> 抽</div>
-                    <button class="del-btn-icon" onclick="deleteRec(${r.id})" title="刪除紀錄">🗑️</button>
-                    <div class="drag-handle" title="按住拖曳來排序">☰</div>
+                <div class="h-pulls">
+                    <span class="pull-num">${r.pulls}</span> 抽
                 </div>
+
+                <div class="h-luck ${r.pulls > 55 ? 'luck-high' : ''} ${isBlack ? 'luck-black-light' : ''}"
+                     style="${r.pulls <= 55 ? 'background-color:' + r.luck.c + 'BF;color:#fff;' : ''}">
+                     ${r.luck.t}
+                </div>
+
+                    <button
+                     class="edit-time-btn"
+                    onclick="editRecordTime(${r.id})"
+                    title="編輯抽卡時間"
+                    >
+                    🕒
+                    </button>
+
+                    <button
+                    class="del-btn-icon"
+                    onclick="deleteRec(${r.id})"
+                    title="刪除紀錄"
+                    >
+                    🗑️
+                    </button>
+
+                <div class="drag-handle" title="按住拖曳來排序">
+                    ☰
+                </div>
+            </div>
             </div>
         </div>`;
     }).join('');
