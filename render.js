@@ -10,6 +10,107 @@ window.changePage = function(delta) {
     window.currentPage += delta;
     renderUI();
 };
+// ── 編輯單筆抽卡時間 ──────────────────────────────────────
+window.editRecordTime = function(recordId) {
+    const db = getDB();
+
+    if (!record) {
+        alert('❌ 找不到這筆抽卡紀錄');
+        return;
+    }
+
+    // 如果原本已有時間，轉成方便編輯的格式
+    let currentTime = '';
+
+    if (record.time) {
+        const d = new Date(record.time);
+
+        const yyyy = d.getFullYear();
+        const mm   = String(d.getMonth() + 1).padStart(2, '0');
+        const dd   = String(d.getDate()).padStart(2, '0');
+        const hh   = String(d.getHours()).padStart(2, '0');
+        const min  = String(d.getMinutes()).padStart(2, '0');
+
+        currentTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
+
+    const input = prompt(
+        '請輸入抽卡時間\n格式：YYYY-MM-DD HH:mm\n\n例如：2026-08-25 14:30\n\n留空後按確定可清除時間。',
+        currentTime
+    );
+
+    // 按「取消」：不做任何修改
+    if (input === null) {
+        return;
+    }
+
+    const value = input.trim();
+
+    // 留空：清除手動設定的時間
+    if (value === '') {
+        delete record.time;
+
+        setDB(db);
+        renderUI();
+
+        alert('✅ 已清除這筆抽卡時間');
+        return;
+    }
+
+    // 驗證格式
+    const match = value.match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})$/
+    );
+
+    if (!match) {
+        alert(
+            '❌ 時間格式錯誤\n\n請使用：YYYY-MM-DD HH:mm\n\n例如：2026-08-25 14:30'
+        );
+        return;
+    }
+
+    const [
+        ,
+        year,
+        month,
+        day,
+        hour,
+        minute
+    ] = match;
+
+    const date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        0
+    );
+
+    // 防止輸入不存在的日期，例如 2026-02-30
+    if (
+        date.getFullYear() !== Number(year) ||
+        date.getMonth() !== Number(month) - 1 ||
+        date.getDate() !== Number(day) ||
+        date.getHours() !== Number(hour) ||
+        date.getMinutes() !== Number(minute)
+    ) {
+        alert('❌ 請輸入有效的日期與時間');
+        return;
+    }
+
+    // 儲存 Unix Timestamp
+    record.time = date.getTime();
+
+    setDB(db);
+
+    // 重新渲染後會依照 time 自動重新排序
+    renderUI();
+
+    alert(
+        `✅ 已更新抽卡時間\n\n${record.card || '未知卡片'}\n${value}`
+    );
+};
 
 // ── 主題 ──────────────────────────────────────────────────
 function initTheme() {
