@@ -14,6 +14,8 @@ window.changePage = function(delta) {
 window.editRecordTime = function(recordId) {
     const db = getDB();
 
+    const record = db.find(r => r.id === recordId);
+
     if (!record) {
         alert('❌ 找不到這筆抽卡紀錄');
         return;
