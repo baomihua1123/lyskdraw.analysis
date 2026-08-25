@@ -359,6 +359,7 @@ async function handleOCR(event) {
             const rawText = row.text.trim();
 
         // 跳過太短或明顯是 UI 標題文字的行
+        const hasTimeInRow = /(?:20\d{2}[-/.])?\d{1,2}[-/.]\d{1,2}\s+\d{1,2}[:;.]\d{1,2}[:;.]\d{1,2}/.test(rawText);
         if (rawText.length < 4 ||
             /DEEPSPACE|LIMITED|掉落|預覽|許願|記錄|伺服器|延遲|沒有資料|稍後|再來|UID|uid|類型|名稱|時間/i.test(rawText)
         ) continue;
@@ -600,6 +601,7 @@ async function handleOCR(event) {
             name:     c.name,
             pulls:    pos[i + 1].i - c.i,
             time:     c.time,
+            hasRealTime: c._hasRealTime === true,
             raw:      c.raw,
             prevName: pos[i + 1].name  // 供 handleOCR 判斷是否雙常駐
         })),
