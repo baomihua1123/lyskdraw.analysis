@@ -224,3 +224,12 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
 .drag-handle:active {
     cursor: grabbing;
 }
+/* 編輯抽卡時間按鈕 */
+.edit-time-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    opacity: 0.75;
+}
