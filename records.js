@@ -164,7 +164,12 @@ function addRecord() {
 
     // 取得卡池的預設時間；常駐池無活動時間，改用當下系統時間
     const eventTime  = getEventDate(banner, main);
-    const recordTime = eventTime ? eventTime : Date.now();
+    // OCR 有辨識到截圖上的真實許願時間時，優先使用 OCR 時間
+    const ocrTime = Number(window.currentOCRTime);
+    const recordTime =
+        Number.isFinite(ocrTime) && ocrTime > 0
+        ? ocrTime
+        : (eventTime || Date.now());
 
     // 【Bug 修正】id 改用 nextId()（單調遞增計數器），
     //   避免同一毫秒內連續新增時產生相同 id 導致刪除/拖曳錯亂
@@ -185,6 +190,9 @@ function addRecord() {
     const db = getDB();
     db.push(rec);
     setDB(db);
+    
+    // 本筆 OCR 時間已使用完畢，避免下一筆手動登錄沿用
+    window.currentOCRTime = null;
 
     // 清空輸入欄位，準備下一筆
     document.getElementById('cardName').value = '';
