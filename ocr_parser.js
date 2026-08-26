@@ -128,7 +128,8 @@ async function handleOCR(event) {
 
         const result = countPulls(allRecords);
         if (result.pullEvents.length > 0) {
-             // 保留舊資料優先邏輯：
+
+            // 保留舊資料優先邏輯：
             // 多張五星時從最舊的一筆開始補登
             const targetGold =
                 result.pullEvents[result.pullEvents.length - 1];
@@ -150,7 +151,7 @@ async function handleOCR(event) {
             if (isStandard(targetGold.name) && isStandard(targetGold.prevName)) {
                 finalPoolName = '常駐';
             }
-            
+
             if (typeof window.autoFillFromOCR === 'function') {
                 window.autoFillFromOCR(
                     targetGold.pulls,
