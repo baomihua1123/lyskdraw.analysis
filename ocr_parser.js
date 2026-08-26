@@ -128,6 +128,17 @@ async function handleOCR(event) {
 
         const result = countPulls(allRecords);
         if (result.pullEvents.length > 0) {
+        //新增測試
+        console.table(
+            allRecords.map(r => ({
+                卡名: r.name,
+                星級: r.star,
+                時間: new Date(r.time).toLocaleString(),
+                真實時間: r._hasRealTime,
+                原始OCR: r.raw
+                }))
+            );
+            //
 
             // 保留舊資料優先邏輯：
             // 多張五星時從最舊的一筆開始補登
@@ -151,7 +162,16 @@ async function handleOCR(event) {
             if (isStandard(targetGold.name) && isStandard(targetGold.prevName)) {
                 finalPoolName = '常駐';
             }
-
+            //新增測試
+            console.log('🎯 最終送入 autoFillFromOCR 的五星資料', {
+                name: targetGold.name,
+                pulls: targetGold.pulls,
+                time: targetGold.time,
+                timeText: new Date(targetGold.time).toLocaleString(),
+                hasRealTime: targetGold.hasRealTime,
+                raw: targetGold.raw
+                });
+            //
             if (typeof window.autoFillFromOCR === 'function') {
                 window.autoFillFromOCR(
                     targetGold.pulls,
@@ -513,6 +533,13 @@ async function handleOCR(event) {
             }
         // ── 保存 OCR 診斷資訊 ─────────────────────────────────────
         //    不影響原本資料格式，只額外增加 _starDebug。
+        console.log('📅 OCR紀錄診斷', {
+            cardName,
+            rawText,
+            time,
+            hasRealTime
+        });
+        //新增測試
         records.push({
             star,
             time,
