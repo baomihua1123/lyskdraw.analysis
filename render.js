@@ -129,6 +129,26 @@ function toggleTheme() {
     document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
+// ── 抽卡數據統計：點標題整欄收合／展開 ────────────────────
+//    記住使用者的收合狀態，下次開啟頁面時維持原樣。
+function toggleStatsBoard() {
+    const board = document.getElementById('statsBoard');
+    const arrow = document.getElementById('statsBoardArrow');
+    const willCollapse = board.style.display !== 'none';
+    board.style.display = willCollapse ? 'none' : 'grid';
+    arrow.textContent   = willCollapse ? '▼' : '▲';
+    localStorage.setItem('statsBoardCollapsed', willCollapse ? 'true' : 'false');
+}
+
+function initStatsBoardCollapse() {
+    const collapsed = localStorage.getItem('statsBoardCollapsed') === 'true';
+    const board = document.getElementById('statsBoard');
+    const arrow = document.getElementById('statsBoardArrow');
+    if (!board || !arrow) return;
+    board.style.display = collapsed ? 'none' : 'grid';
+    arrow.textContent   = collapsed ? '▼' : '▲';
+}
+
 // ── 主推設定 ──────────────────────────────────────────────
 function toggleOshiEdit() {
     const group    = document.getElementById('oshiGroup');
@@ -319,3 +339,4 @@ initTheme();
 loadOshis();
 updateBannerRecommendations();
 renderUI();
+initStatsBoardCollapse();

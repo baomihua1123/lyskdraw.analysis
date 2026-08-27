@@ -19,7 +19,7 @@
 <div class="container">
     <div class="header-section">
         <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
-        <button id="poolEditorBtn" onclick="togglePoolEditor()" style="display:inline-block; margin-bottom:6px; padding:4px 10px; font-size:12px; font-weight:bold; color:#fff; background:var(--primary); border:none; border-radius:12px; cursor:pointer;" title="新增／管理卡池資料">⚙️ 卡池資料管理</button>
+        <button class="pool-editor-btn" id="poolEditorBtn" onclick="togglePoolEditor()" title="新增／管理卡池資料">⚙️</button>
         <h1>✨ 抽卡紀錄分析器</h1>
         <p class="subtitle">抽卡體質鑑定🙌</p>
     </div>
@@ -118,9 +118,12 @@
                 <div class="pending-item pending-re" onclick="editPending('re')">復刻池必出UP ✏️<span id="pRe">140</span></div>
             </div>
 
-            <div class="section-header" style="margin-top: 5px;">📈 抽卡數據統計</div>
+            <div class="section-header collapsible-header" id="statsBoardHeader" onclick="toggleStatsBoard()" style="margin-top: 5px;">
+                <span>📈 抽卡數據統計</span>
+                <span id="statsBoardArrow" class="collapse-arrow">▲</span>
+            </div>
             
-            <div class="stats-board">
+            <div class="stats-board" id="statsBoard">
                 <div class="stat-card">
                     <div class="stat-title">限定池</div>
                     <div class="stat-value"><span id="statLimPulls">0</span><span class="stat-unit">抽</span></div>
@@ -174,7 +177,7 @@
 
 <div class="section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    📊 抽卡紀錄與長條圖
+                    📊 抽卡紀錄
                     <select id="recordFilterSelect" class="luck-select" style="margin-bottom: 0; padding: 2px 20px 2px 8px; width: auto; font-size: 13px; background-size: 12px;" onchange="window.currentPage = 1; renderUI()">
                         <option value="全部" selected>全部紀錄</option>
                         <option value="限定">限定池</option>

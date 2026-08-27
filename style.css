@@ -57,6 +57,8 @@ body {
 .header-section { position: relative; text-align: center; margin-bottom: 25px; }
 h1 { color: var(--title-color); margin: 0; font-size: 24px; }
 .theme-btn { position: absolute; right: 0; top: 10px; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0; }
+.pool-editor-btn { position: absolute; right: 0; top: 36px; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0; color: var(--text-sub); }
+.pool-editor-btn:hover { color: var(--primary); }
 p.subtitle { color: var(--text-sub); font-size: 13px; margin: 6px 0 0 0; }
 
 .main-layout { display: flex; flex-direction: column; gap: 25px; }
@@ -102,6 +104,8 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
 [data-theme="light"] .ocr-box { background: rgba(219, 39, 119, 0.05); }
 
 .section-header { font-size: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 25px; }
+.collapsible-header { cursor: pointer; user-select: none; }
+.collapse-arrow { font-size: 12px; color: var(--text-sub); transition: transform 0.2s; }
 
 .luck-select { padding: 10px; background-color: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; font-weight: bold; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238b5cf6%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
 [data-theme="light"] .luck-select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23db2777%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); }
