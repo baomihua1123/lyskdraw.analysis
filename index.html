@@ -19,6 +19,7 @@
 <div class="container">
     <div class="header-section">
         <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+        <button id="poolEditorBtn" onclick="togglePoolEditor()" style="display:inline-block; margin-bottom:6px; padding:4px 10px; font-size:12px; font-weight:bold; color:#fff; background:var(--primary); border:none; border-radius:12px; cursor:pointer;" title="新增／管理卡池資料">⚙️ 卡池資料管理</button>
         <h1>✨ 抽卡紀錄分析器</h1>
         <p class="subtitle">抽卡體質鑑定🙌</p>
     </div>
@@ -197,11 +198,107 @@
         </div> 
     </div>
 
+<!-- ════════════════════════════════════════════════════════
+     卡池資料管理面板（新增功能）
+     讓使用者可以自行新增／刪除限定・復刻卡池與常駐卡，
+     資料存放於 localStorage，並在頁面載入時自動合併進
+     eventCards / standardCards，無需等待官方更新程式碼。
+     ════════════════════════════════════════════════════════ -->
+<div id="poolEditorModal" class="pool-editor-overlay" style="display:none;">
+  <div class="pool-editor-panel">
+    <div class="pool-editor-header">
+      <h2>🎴 卡池資料管理</h2>
+      <button class="pool-editor-close" onclick="togglePoolEditor()">✕</button>
+    </div>
+
+    <div class="pool-editor-tabs">
+      <button class="pool-editor-tab active" data-tab="event" onclick="switchPoolEditorTab('event')">＋ 限定／復刻卡池</button>
+      <button class="pool-editor-tab" data-tab="standard" onclick="switchPoolEditorTab('standard')">＋ 常駐卡</button>
+      <button class="pool-editor-tab" data-tab="list" onclick="switchPoolEditorTab('list')">📋 已新增項目</button>
+    </div>
+
+    <!-- 分頁一：新增限定／復刻卡池 -->
+    <div class="pool-editor-tabpanel" id="peTab-event">
+      <div class="form-group">
+        <label class="group-label">年份</label>
+        <input type="number" id="peYear" placeholder="例如 2026" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="group-label">起訖日期（格式 M.D-M.D）</label>
+        <input type="text" id="peDuration" placeholder="例如 8.17-8.31" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="group-label">卡池名稱</label>
+        <input type="text" id="peEventName" placeholder="例如 破陣子" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="group-label">卡池分類</label>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <select id="peCategory" class="pool-editor-select" style="width:auto;" onchange="updateCustomPoolTypeLabel()">
+            <option value="單人池">單人池</option>
+            <option value="混池">混池</option>
+            <option value="日卡池">日卡池</option>
+            <option value="生日池">生日池</option>
+          </select>
+          <label class="radio-label"><input type="checkbox" id="peIsRerun" onchange="updateCustomPoolTypeLabel()"> 🔄 這是復刻卡池</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="group-label">卡池類型標籤（自動產生，可自行微調）</label>
+        <input type="text" id="peLabel" placeholder="例如 日卡池(復刻)" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="group-label">UP 角色與思念卡（混池請新增多列）</label>
+        <div id="peLeadCardRows"></div>
+        <button type="button" class="pool-editor-addrow-btn" onclick="addLeadCardRow()">＋ 新增角色列</button>
+      </div>
+      <button class="main-btn" onclick="submitCustomEvent()">✨ 新增此卡池</button>
+    </div>
+
+    <!-- 分頁二：新增常駐卡 -->
+    <div class="pool-editor-tabpanel" id="peTab-standard" style="display:none;">
+      <div class="form-group">
+        <label class="group-label">男主</label>
+        <select id="peStdLead" class="pool-editor-select">
+          <option value="祁煜">🐟 祁煜</option>
+          <option value="沈星回">🌟 沈星回</option>
+          <option value="黎深">🍐 黎深</option>
+          <option value="秦徹">🚘 秦徹</option>
+          <option value="夏以晝">🍎 夏以晝</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="group-label">思念卡名</label>
+        <input type="text" id="peStdCard" placeholder="例如 破陣子" style="width:100%;">
+      </div>
+      <button class="main-btn" onclick="submitCustomStandardCard()">✨ 新增此常駐卡</button>
+    </div>
+
+    <!-- 分頁三：管理已新增項目 -->
+    <div class="pool-editor-tabpanel" id="peTab-list" style="display:none;">
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <button class="pool-editor-io-btn" onclick="exportPoolData()">📤 匯出備份</button>
+        <label class="pool-editor-io-btn" style="cursor:pointer;">📥 匯入備份
+          <input type="file" accept=".json" style="display:none;" onchange="importPoolData(event)">
+        </label>
+      </div>
+      <div class="section-header" style="margin-top:6px;">限定／復刻卡池</div>
+      <div id="peEventList"></div>
+      <div class="section-header" style="margin-top:10px;">常駐卡</div>
+      <div id="peStandardList"></div>
+    </div>
+
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <!-- 靜態資料：必須最先載入，ocr_parser.js 的 KNOWN_CARDS 和 pool-logic.js 的 cardToLeadMap 都依賴這兩個檔案 -->
 <script src="love_and_deepspace_events.js"></script>
 <script src="love_and_deepspace_standard.js"></script>
+
+<!-- 【新增】使用者自訂卡池資料：需在 ocr_parser.js / pool-logic.js 之前載入並完成合併 -->
+<script src="custom-pools.js"></script>
 
 <!-- OCR 辨識核心：依賴上方靜態資料 -->
 <script src="ocr_parser.js"></script>
@@ -215,6 +312,9 @@
 <script src="records.js"></script>
 <script src="render.js"></script>
 <script src="data_sync.js"></script>
+
+<!-- 【新增】卡池資料管理面板 UI，需在 pool-logic.js / storage.js 之後載入 -->
+<script src="pool-editor-ui.js"></script>
 
 </body>
 </html>

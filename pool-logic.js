@@ -4,8 +4,12 @@
 
 // ── O(1) 卡名 → 角色 對照表 ───────────────────────────────
 //    在靜態資料載入後一次性建立，取代原本 O(n) 的迭代搜尋。
-//    此 IIFE 在腳本解析時立即執行，無需等待 DOMContentLoaded。
-const cardToLeadMap = (() => {
+//    此函式在腳本解析時立即執行一次，無需等待 DOMContentLoaded。
+//    【新增】原本是 const + IIFE，改為 let + 具名函式，
+//    是為了讓使用者透過「卡池資料管理」新增/刪除自訂卡池後，
+//    custom-pools.js 能呼叫 window.rebuildCardToLeadMap() 重建對照表，
+//    不必重新整理頁面就能讓 OCR 辨識、反查卡池等功能立即生效。
+function buildCardToLeadMap() {
     const map = new Map();
     if (typeof standardCards !== 'undefined') {
         for (const [lead, cards] of Object.entries(standardCards))
@@ -18,7 +22,14 @@ const cardToLeadMap = (() => {
         });
     }
     return map;
-})();
+}
+
+let cardToLeadMap = buildCardToLeadMap();
+
+// 提供給 custom-pools.js：使用者新增/刪除自訂卡池資料後呼叫，重建對照表
+window.rebuildCardToLeadMap = function () {
+    cardToLeadMap = buildCardToLeadMap();
+};
 
 function findTrueLead(cardName) {
     if (!cardName || cardName === '未知') {
