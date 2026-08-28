@@ -277,7 +277,7 @@ function renderUI() {
         const subTagHtml = r.main !== '常駐' ? `<span class="tag tag-lim">${r.sub}</span>` : '';
 
         return `
-        <div class="h-record-card" draggable="true" 
+        <div class="h-record-card" data-lead="${r.lead}" draggable="true" 
              ondragstart="handleDragStart(event, ${r.id})" 
              ondragover="handleDragOver(event)" 
              ondragleave="handleDragLeave(event)" 
@@ -285,7 +285,7 @@ function renderUI() {
              ondragend="handleDragEnd(event)">
             <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%;"></div>
             <div class="h-content">
-                <div class="h-area-tags h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
+                <div class="h-area-tags h-tags"><span class="lead-icon">${leadIcons[r.lead] || ''}</span>${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
                 <div class="h-area-title h-title">
                     <span class="h-card-name" style="font-size: 15px;font-weight: bold;color: var(--text-main);">${r.card || '未知'}</span>
                     <span class="h-banner-name" style="font-size: 12px;font-weight: normal;"> | ${r.banner}</span>

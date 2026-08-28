@@ -15,6 +15,13 @@
     --rerun-color: #ec4899;     
     --oshi-color: #ec4899;      
     --title-color: #ddd6fe;     
+
+    /* 角色專屬底色（依 r.lead 套用在紀錄卡片上，深色主題） */
+    --lead-shen-bg: #4B4678; --lead-shen-hover: #403B68; --lead-shen-border: #615A96;
+    --lead-li-bg:   #2B526F; --lead-li-hover:   #24445F; --lead-li-border:   #3F7092;
+    --lead-qi-bg:   #83435E; --lead-qi-hover:   #703B52; --lead-qi-border:   #A65C78;
+    --lead-qin-bg:  #773441; --lead-qin-hover:  #652E3B; --lead-qin-border:  #9B4A59;
+    --lead-xia-bg:  #795244; --lead-xia-hover:  #67463A; --lead-xia-border:  #A87557;
 }
 
 [data-theme="light"] {
@@ -29,6 +36,13 @@
     --rerun-color: #a855f7;
     --oshi-color: #a855f7;
     --title-color: #db2777;
+
+    /* 角色專屬底色（淺色主題） */
+    --lead-shen-bg: #E3DEFA; --lead-shen-hover: #EEEAFE; --lead-shen-border: #B8AFE8;
+    --lead-li-bg:   #D8E9F2; --lead-li-hover:   #E5F1F7; --lead-li-border:   #A6C6D8;
+    --lead-qi-bg:   #F3D8E3; --lead-qi-hover:   #F8E5EC; --lead-qi-border:   #DCA5B9;
+    --lead-qin-bg:  #E4D2D2; --lead-qin-hover:  #EDE0E0; --lead-qin-border:  #A97878;
+    --lead-xia-bg:  #F4DFD0; --lead-xia-hover:  #F9EADF; --lead-xia-border:  #DDB89B;
 }
 
 body {
@@ -116,8 +130,22 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
 .peak-label-best { color: #4ade80; }
 .peak-label-spook { color: #ef4444; }
 
-.h-record-card { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; height: 48px; }
+.h-record-card { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; height: 48px; transition: background-color 0.2s, border-color 0.2s; }
 .h-bar-bg { position: absolute; left: 0; top: 0; bottom: 0; opacity: 1; z-index: 1; transition: width 0.5s ease-out; }
+
+/* ── 角色專屬底色：依卡片 data-lead 屬性套用不同配色 ── */
+.h-record-card[data-lead="沈星回"] { background-color: var(--lead-shen-bg); border-color: var(--lead-shen-border); }
+.h-record-card[data-lead="沈星回"]:hover { background-color: var(--lead-shen-hover); }
+.h-record-card[data-lead="黎深"]   { background-color: var(--lead-li-bg);   border-color: var(--lead-li-border); }
+.h-record-card[data-lead="黎深"]:hover   { background-color: var(--lead-li-hover); }
+.h-record-card[data-lead="祁煜"]   { background-color: var(--lead-qi-bg);   border-color: var(--lead-qi-border); }
+.h-record-card[data-lead="祁煜"]:hover   { background-color: var(--lead-qi-hover); }
+.h-record-card[data-lead="秦徹"]   { background-color: var(--lead-qin-bg);  border-color: var(--lead-qin-border); }
+.h-record-card[data-lead="秦徹"]:hover   { background-color: var(--lead-qin-hover); }
+.h-record-card[data-lead="夏以晝"] { background-color: var(--lead-xia-bg);  border-color: var(--lead-xia-border); }
+.h-record-card[data-lead="夏以晝"]:hover { background-color: var(--lead-xia-hover); }
+
+.lead-icon { font-size: 14px; line-height: 1; margin-right: 2px; }
 
 /* ── 卡片內容：CSS Grid，桌面單行／手機雙行共用同一套 HTML ──
    grid-template-areas 決定四個區塊的排列方式：
