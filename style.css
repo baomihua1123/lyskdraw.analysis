@@ -160,8 +160,34 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
         row-gap: 6px;
         padding: 8px 12px;
     }
-    .h-area-pulls   { justify-self: end; }
+    .h-area-pulls   { justify-self: end; align-self: flex-start; }
     .h-area-actions { justify-self: end; }
+
+    /* 卡名／卡池名／時間改直向堆疊，依優先順序各自獨立一行：
+       1. 卡名：完整顯示，必要時自動換行，絕不截斷
+       2. 卡池名：次要資訊，過長才省略號
+       3. [時間]：最低優先，字體最小、顏色最淡 */
+    .h-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        white-space: normal;
+        overflow: visible;
+    }
+    .h-card-name {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        word-break: break-word;
+    }
+    .h-banner-name {
+        max-width: 100%;
+        opacity: 0.85;
+    }
+    .h-date {
+        font-size: 11px;
+        opacity: 0.7;
+    }
 }
 .tag { padding: 0 6px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 11px; color: white; font-weight: bold; box-sizing: border-box; white-space: nowrap; }
 .tag-lim { background: var(--limited-color); }
