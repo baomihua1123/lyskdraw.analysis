@@ -285,37 +285,20 @@ function renderUI() {
              ondragend="handleDragEnd(event)">
             <div class="h-bar-bg" style="width: ${Math.min((r.pulls / 70) * 100, 100)}%;"></div>
             <div class="h-content">
-                <div class="h-left">
-                    <div class="h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
-                    <span class="h-title">
-                        <span style="font-size: 15px;font-weight: bold;color: var(--text-main);">${r.card || '未知'}</span>
-                        <span style="font-size: 12px;font-weight: normal;"> | ${r.banner}</span>
-                        <span class="h-date">${dateStr}</span>
-                    </span>
+                <div class="h-area-tags h-tags">${r.main === '復刻' ? '<span class="tag tag-re">復刻</span>' : ''} ${subTagHtml}<span class="tag" style="background-color: ${statusColor};"> ${cardTypeStr}</span></div>
+                <div class="h-area-title h-title">
+                    <span class="h-card-name" style="font-size: 15px;font-weight: bold;color: var(--text-main);">${r.card || '未知'}</span>
+                    <span class="h-banner-name" style="font-size: 12px;font-weight: normal;"> | ${r.banner}</span>
+                    <span class="h-date">${dateStr}</span>
                 </div>
-                <div class="h-right">
-                <div class="h-pulls">
+                <div class="h-area-pulls h-pulls">
                     <span class="pull-num">${r.pulls}</span> 抽
                 </div>
-                
-                    <button
-                     class="edit-time-btn"
-                    onclick="editRecordTime(${r.id})"
-                    title="編輯抽卡時間">
-                    🕒
-                    </button>
-
-                    <button
-                    class="del-btn-icon"
-                    onclick="deleteRec(${r.id})"
-                    title="刪除紀錄">
-                    🗑️
-                    </button>
-
-                <div class="drag-handle" title="按住拖曳來排序">
-                    ☰
+                <div class="h-area-actions h-actions">
+                    <button class="edit-time-btn" onclick="editRecordTime(${r.id})" title="編輯抽卡時間">🕒</button>
+                    <button class="del-btn-icon" onclick="deleteRec(${r.id})" title="刪除紀錄">🗑️</button>
+                    <div class="drag-handle" title="按住拖曳來排序">☰</div>
                 </div>
-            </div>
             </div>
         </div>`;
     }).join('');

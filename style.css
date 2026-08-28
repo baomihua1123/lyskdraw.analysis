@@ -116,18 +116,56 @@ input[type="radio"], input[type="checkbox"] { width: 16px; height: 16px; margin:
 .peak-label-best { color: #4ade80; }
 .peak-label-spook { color: #ef4444; }
 
-.h-record-card { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; display: flex; height: 48px; }
+.h-record-card { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; height: 48px; }
 .h-bar-bg { position: absolute; left: 0; top: 0; bottom: 0; opacity: 1; z-index: 1; transition: width 0.5s ease-out; }
-.h-content { position: relative; z-index: 2; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
-.h-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; white-space: nowrap; }
-.h-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ── 卡片內容：CSS Grid，桌面單行／手機雙行共用同一套 HTML ──
+   grid-template-areas 決定四個區塊的排列方式：
+   桌面：一行「tags title pulls actions」
+   手機（≤480px）：兩行「title pulls」／「tags actions」 */
+.h-content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "tags title pulls actions";
+    align-items: center;
+    column-gap: 8px;
+    padding: 0 12px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+.h-area-tags   { grid-area: tags; }
+.h-area-title  { grid-area: title; min-width: 0; }
+.h-area-pulls  { grid-area: pulls; }
+.h-area-actions{ grid-area: actions; }
+
 .h-date { font-size: 12px; color: var(--text-main); font-family: monospace; }
 .h-tags { display: flex; gap: 4px; align-items: center; }
+.h-title { display: flex; align-items: baseline; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; }
+.h-card-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.h-banner-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-pulls { font-size: 12px; color: var(--text-main); display: flex; align-items: baseline; justify-content: flex-end; gap: 3px; white-space: nowrap; }
+.h-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+/* ── 手機版（≤480px）：改成兩行，卡片跟著長高 ── */
+@media (max-width: 480px) {
+    .h-record-card { height: auto; }
+    .h-content {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "title  pulls"
+            "tags   actions";
+        row-gap: 6px;
+        padding: 8px 12px;
+    }
+    .h-area-pulls   { justify-self: end; }
+    .h-area-actions { justify-self: end; }
+}
 .tag { padding: 0 6px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 11px; color: white; font-weight: bold; box-sizing: border-box; white-space: nowrap; }
 .tag-lim { background: var(--limited-color); }
 .tag-re { background: var(--rerun-color); }
-.h-title { display: flex; align-items: baseline; gap: 6px; }
-.h-pulls { font-size: 12px; color: var(--text-main); display: flex; align-items: baseline; justify-content: flex-end; width: 45px; gap: 3px; }
 .pull-num { font-size: 18px; font-weight: bold; }
 .del-btn-icon { background: transparent; border: none; font-size: 14px; cursor: pointer; padding: 4px; opacity: 0.5; transition: 0.2s; width: 28px; text-align: center; }
 .del-btn-icon:hover { opacity: 1; color: #ef4444; }
