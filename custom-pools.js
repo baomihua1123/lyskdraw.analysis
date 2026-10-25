@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════
-//  custom-pools.js — 使用者自訂卡池資料（新增／刪除／合併／匯出入）
+//  custom-pools.js — 使用者自訂卡池資料（新增／編輯／刪除／合併／匯出入）
 //
 //  ⚠️ 載入順序很重要：必須放在
 //     love_and_deepspace_events.js / love_and_deepspace_standard.js 之後，
@@ -20,9 +20,34 @@ const getCustomStandard = () => JSON.parse(localStorage.getItem(CUSTOM_STANDARD_
 const saveCustomEvents   = (list) => localStorage.setItem(CUSTOM_EVENTS_KEY,   JSON.stringify(list));
 const saveCustomStandard = (list) => localStorage.setItem(CUSTOM_STANDARD_KEY, JSON.stringify(list));
 
+// ── 常駐卡「由自訂資料實際加入」的記錄 ─────────────────────
+//    若某張卡本來就存在於內建的 standardCards（例如官方資料檔日後
+//    補上了同名卡），自訂資料不會重複加入；之後刪除／編輯自訂項目時，
+//    也只會移除「自訂資料實際加入的那一份」，不會誤刪內建資料。
+const _customStdAdded = new Set();
+const _stdKey = (lead, card) => `${lead}|${card}`;
+
+function _addLiveStandardCard(lead, card) {
+    if (typeof standardCards === 'undefined') return;
+    if (!standardCards[lead]) standardCards[lead] = [];
+    if (!standardCards[lead].includes(card)) {
+        standardCards[lead].push(card);
+        _customStdAdded.add(_stdKey(lead, card));
+    }
+}
+
+function _removeLiveStandardCard(lead, card) {
+    if (typeof standardCards === 'undefined' || !standardCards[lead]) return;
+    const key = _stdKey(lead, card);
+    if (!_customStdAdded.has(key)) return;
+    const idx = standardCards[lead].indexOf(card);
+    if (idx !== -1) standardCards[lead].splice(idx, 1);
+    _customStdAdded.delete(key);
+}
+
 // ── 合併：把使用者先前新增的自訂資料併入全域 eventCards / standardCards ──
 //    只在腳本載入當下執行一次。
-//    events：直接 push 進 eventCards（並標記 _custom 以利日後刪除比對）
+//    events：直接 push 進 eventCards（並標記 _custom 以利日後編輯／刪除比對）
 //    standard：併入對應男主的常駐卡陣列，並避免重複
 function mergeCustomPoolData() {
     if (typeof eventCards !== 'undefined') {
@@ -31,22 +56,19 @@ function mergeCustomPoolData() {
             eventCards.push(ev);
         });
     }
-    if (typeof standardCards !== 'undefined') {
-        getCustomStandard().forEach(({ lead, card }) => {
-            if (!standardCards[lead]) standardCards[lead] = [];
-            if (!standardCards[lead].includes(card)) standardCards[lead].push(card);
-        });
-    }
+    getCustomStandard().forEach(({ lead, card }) => _addLiveStandardCard(lead, card));
 }
 mergeCustomPoolData();
 
-// ── 每次新增／刪除自訂資料後：重建 cardToLeadMap 並刷新畫面 ──
+// ── 每次新增／編輯／刪除自訂資料後：重建 cardToLeadMap 並刷新畫面 ──
 //    不需要重新整理頁面即可讓變更立即生效。
+//    renderUI 會依最新的卡池資料重新判定每筆紀錄的 UP／歪卡結果。
 function afterCustomPoolChange() {
     if (typeof window.rebuildCardToLeadMap === 'function') window.rebuildCardToLeadMap();
     if (typeof updateBannerRecommendations === 'function') updateBannerRecommendations();
     if (typeof updatePulledCardList === 'function') updatePulledCardList();
     if (typeof renderPoolManagerLists === 'function') renderPoolManagerLists();
+    if (typeof renderUI === 'function') renderUI();
 }
 
 // ── 新增：限定／復刻卡池 ──────────────────────────────────
@@ -61,6 +83,27 @@ window.addCustomEvent = function (eventObj) {
 
     if (typeof eventCards !== 'undefined') eventCards.push(eventObj);
     afterCustomPoolChange();
+};
+
+// ── 編輯：限定／復刻卡池 ──────────────────────────────────
+//    data 為 { year, duration, eventName, poolType, cards }，id 與建立時間不變。
+//    成功時回傳「修改前」的卡池資料（讓呼叫端可判斷是否改了名稱），找不到則回傳 null。
+window.updateCustomEvent = function (id, data) {
+    const list = getCustomEvents();
+    const idx  = list.findIndex(e => e.id === id);
+    if (idx === -1) return null;
+
+    const before = list[idx];
+    list[idx] = { ...before, ...data, id: before.id, _custom: true };
+    saveCustomEvents(list);
+
+    // 同步更新記憶體中的資料（就地修改，維持原本在 eventCards 中的位置）
+    if (typeof eventCards !== 'undefined') {
+        const live = eventCards.find(e => e._custom && e.id === id);
+        if (live) Object.assign(live, data);
+    }
+    afterCustomPoolChange();
+    return before;
 };
 
 // ── 刪除：限定／復刻卡池（只能刪除自訂新增的，內建資料不受影響）──
@@ -80,11 +123,24 @@ window.addCustomStandardCard = function (lead, card) {
     list.push({ id: Date.now(), lead, card });
     saveCustomStandard(list);
 
-    if (typeof standardCards !== 'undefined') {
-        if (!standardCards[lead]) standardCards[lead] = [];
-        if (!standardCards[lead].includes(card)) standardCards[lead].push(card);
-    }
+    _addLiveStandardCard(lead, card);
     afterCustomPoolChange();
+};
+
+// ── 編輯：常駐卡（可更換男主或卡名）──────────────────────
+window.updateCustomStandardCard = function (id, lead, card) {
+    const list = getCustomStandard();
+    const idx  = list.findIndex(c => c.id === id);
+    if (idx === -1) return false;
+
+    const before = list[idx];
+    list[idx] = { ...before, lead, card };
+    saveCustomStandard(list);
+
+    _removeLiveStandardCard(before.lead, before.card);
+    _addLiveStandardCard(lead, card);
+    afterCustomPoolChange();
+    return true;
 };
 
 // ── 刪除：常駐卡 ───────────────────────────────────────────
@@ -94,11 +150,7 @@ window.deleteCustomStandardCard = function (id) {
     if (!target) return;
 
     saveCustomStandard(list.filter(c => c.id !== id));
-
-    if (typeof standardCards !== 'undefined' && standardCards[target.lead]) {
-        const idx = standardCards[target.lead].indexOf(target.card);
-        if (idx !== -1) standardCards[target.lead].splice(idx, 1);
-    }
+    _removeLiveStandardCard(target.lead, target.card);
     afterCustomPoolChange();
 };
 
